@@ -5,8 +5,10 @@
 #include <PS2.h>
 #include <HMC5883L.h>
 
-#define CLOCK_PIN 6
-#define DATA_PIN 5
+#define MOUSE_CLOCK_PIN 6
+#define MOUSE_DATA_PIN 5
+#define COMPASS_SCALE 1.3
+#define COMPASS_DECLINATION 0.03199
 
 class Position {
 public:

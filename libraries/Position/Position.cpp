@@ -1,10 +1,8 @@
 #include "Position.h"
 
-#define SCALE 1.3
-#define DECLINATION 0.03199
 
-Position::Position(): mouse(CLOCK_PIN, DATA_PIN), compass() {
-	Serial.println("Position constructor");
+
+Position::Position(): mouse(MOUSE_CLOCK_PIN, MOUSE_DATA_PIN), compass() {
 	x = 0;
 	y = 0;
 }
@@ -13,7 +11,7 @@ bool Position::init() {
 	// inizitialize mouse
 	mouseInit();
 	// initialize compass
-	int error = compass.SetScale(SCALE);
+	int error = compass.SetScale(COMPASS_SCALE);
 	if (error != 0) {
 		Serial.println(compass.GetErrorText(error));
 		return false;
@@ -25,7 +23,7 @@ bool Position::init() {
 		return false;
 	}
 	MagnetometerScaled scaled = compass.ReadScaledAxis();
-	relativeAngle = atan2(scaled.YAxis, scaled.XAxis) + DECLINATION; 
+	relativeAngle = atan2(scaled.YAxis, scaled.XAxis) + COMPASS_DECLINATION; 
 	northAngle = fmod(PI/2 - relativeAngle, 2*PI); // the robot is placed initially at 90 degree
 	return true;
 }
@@ -63,7 +61,7 @@ void Position::reset() {
 double Position::updateAngle() {
 	MagnetometerScaled scaled = compass.ReadScaledAxis();
 	float heading = atan2(scaled.YAxis, scaled.XAxis);
-	heading += DECLINATION;
+	heading += COMPASS_DECLINATION;
 	if (heading < 0) heading += 2 * PI;
 	return heading;
 }
