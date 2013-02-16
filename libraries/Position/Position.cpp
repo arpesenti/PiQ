@@ -30,27 +30,6 @@ bool Position::init() {
 	return true;
 }
 
-// Position::Position(int clockPinMouse, int dataPinMouse): mouse(clockPinMouse, dataPinMouse), compass() {
-// 	Serial.println("Position constructor");
-// 	x = 0;
-// 	y = 0;
-// 	// inizitialize mouse
-// 	mouseInit();
-// 	// initialize compass
-// 	int error = compass.SetScale(SCALE);
-// 	if (error != 0) {
-// 		Serial.println(compass.GetErrorText(error));
-// 	}
-// 	error = 0;
-// 	error = compass.SetMeasurementMode(Measurement_Continuous);
-// 	if (error != 0) {
-// 		Serial.println(compass.GetErrorText(error));
-// 	}
-// 	MagnetometerScaled scaled = compass.ReadScaledAxis();
-// 	relativeAngle = atan2(scaled.YAxis, scaled.XAxis) + DECLINATION; 
-// 	northAngle = fmod(PI/2 - relativeAngle, 2*PI); // the robot is placed initially at 90 degree
-// }
-
 int Position::getX() {
 	return x;
 }

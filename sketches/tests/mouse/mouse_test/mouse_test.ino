@@ -1,4 +1,4 @@
-#include <ps2.h>
+#include <PS2.h>
 
 /*
  * an arduino sketch to interface with a ps/2 mouse.

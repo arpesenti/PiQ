@@ -15,7 +15,10 @@ void setup()
   Serial.begin(9600);
   Wire.begin();
   Serial.println("Init setup");
-  position.init();
+  bool succesful = position.init();
+  if (!succesful) {
+    Serial.println("Error in initializing position");
+  }
   motorBegin(MOTOR_LEFT);
   motorBegin(MOTOR_RIGHT);
   output();
