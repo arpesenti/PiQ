@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <IRremote.h>
+#include <Pins.h>
 
-#define IR_PIN 11
 #define WAIT_STRATEGY_BUTTON 0 //TODO remote code
 #define WAIT_STRATEGY 0
 #define NORMAL_STRATEGY_BUTTON 1 //TODO remote code

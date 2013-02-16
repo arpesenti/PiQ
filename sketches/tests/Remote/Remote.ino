@@ -1,5 +1,6 @@
 #include <Remote.h>
 #include <IRremote.h>
+#include <Pins.h>
 
 Remote remote;
 char previousStrategy;

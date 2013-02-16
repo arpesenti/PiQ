@@ -3,9 +3,8 @@
 
 #include <Arduino.h>
 #include <Servo.h>
+#include <Pins.h>
 
-#define LEFT_SERVO_PIN 9
-#define RIGHT_SERVO_PIN 10
 #define OPEN_ANGLE 45
 #define LEFT_CLOSED_ANGLE 180
 #define RIGHT_CLOSED_ANGLE 0
