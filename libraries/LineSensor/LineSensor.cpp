@@ -39,6 +39,8 @@ char LineSensor::color() {
 		return 'm';
 	if (Rlevel == LOW && Glevel == HIGH && Blevel == HIGH) // cyan
 		return 'c';
+	
+	return 'n'; // not a known color
 }
 
 int LineSensor::leftReflectance() {
