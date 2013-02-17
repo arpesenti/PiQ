@@ -17,10 +17,13 @@ void setup(){
 void loop(){
   motion.moveForward(50);
   delay(1000);
+  motion.stop();
   motion.moveBackward(100);
   delay(1000);
+  motion.stop();
   motion.rotateLeft(10);
   delay(1000);
+  motion.stop();
   motion.rotateRight(20);
   delay(1000);
   motion.stop();
