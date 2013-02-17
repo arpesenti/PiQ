@@ -1,6 +1,8 @@
 #ifndef Pins_h
 #define Pins_h
 
+// TODO: NEED TO CHANGE DIGITAL PINS ACCORDINGLY TO TIMERS AND FREE PINS!
+
 #define IR_PIN 11
 #define LEFT_SERVO_PIN 9
 #define RIGHT_SERVO_PIN 10
@@ -9,7 +11,11 @@
 
 #define LEFT_REFLECTANCE_PIN A0
 #define RIGHT_REFLECTANCE_PIN A1
-#define COLOR_SENSOR_LED_PIN 11
+#define COLOR_SENSOR_LED_PIN 22
+
+#define PROXIMITY_PIN A2
+#define HIGHDISTANCE_BOTTOM_PIN A3
+#define HIGHDISTANCE_TOP_PIN A4
 
 // connect Color and Magnetometer sensors to SDA and SCK and remember 3.3V
 

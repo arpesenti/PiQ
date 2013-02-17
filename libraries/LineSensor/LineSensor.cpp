@@ -8,7 +8,9 @@ void LineSensor::init(){
 	//Calibrate white 
 	//Need to hold white card in front (1-3mm) of it to calibrate from
 	colorSensor.calibrate();
+	Serial.println("");
 	Serial.println("end of calibration of Color sensor"); 
+	Serial.println("");
 }
 
 char LineSensor::color() {
