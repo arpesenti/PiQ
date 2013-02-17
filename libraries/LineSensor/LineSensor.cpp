@@ -17,11 +17,11 @@ char LineSensor::color() {
 	int Glevel = level(color.green);
 	int Blevel = level(color.blue);
 
-	if (Rlevel == HIGH && Glevel == HIGH && Blevel == HIGH) // white
+	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
 		return 'w';
-	if (Rlevel == LOW && Glevel == LOW && Blevel == LOW) // black
+	if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_LOW) // black
 		return 'k';
-	if (Rlevel == LOW && Glevel == LOW && Blevel == HIGH) // blue
+	if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_HIGH) // blue
 		return 'b';
 
 	// not strictly necessary for our purpose, just for testing the sensor
@@ -29,15 +29,15 @@ char LineSensor::color() {
 	// CYAN -> HIGH: BLU GREEN
 	//  YELLOW -> HIGH: RED GREEN
 	//  MAGENTA -> HIGH: BLU RED
-	if (Rlevel == HIGH && Glevel == LOW && Blevel == LOW) // red
+	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_LOW) // red
 		return 'r';
-	if (Rlevel == LOW && Glevel == HIGH && Blevel == LOW) // green
+	if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_LOW) // green
 		return 'g';
-	if (Rlevel == HIGH && Glevel == HIGH && Blevel == LOW) // yellow
+	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_LOW) // yellow
 		return 'y';
-	if (Rlevel == HIGH && Glevel == LOW && Blevel == HIGH) // magenta
+	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == HIGH) // magenta
 		return 'm';
-	if (Rlevel == LOW && Glevel == HIGH && Blevel == HIGH) // cyan
+	if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_HIGH) // cyan
 		return 'c';
 	
 	return 'n'; // not a known color
@@ -51,15 +51,16 @@ int LineSensor::rightReflectance() {
 	return analogRead(RIGHT_REFLECTANCE_PIN);
 }
 
+//  Lower value is an indication of greater reflection
 int LineSensor::centerReflectance() {
 	RGBC color = colorSensor.read();
-	return color.clear;
+	return (1023 - color.clear);
 }
 
 int LineSensor::level(int component_intensity){
 	if (component_intensity < LOW_THRESHOLD)
-		return LOW;
+		return C_LOW;
 	if (component_intensity > HIGH_THRESHOLD)
-		return HIGH;
-	return MEDIUM;
+		return C_HIGH;
+	return C_MEDIUM;
 }

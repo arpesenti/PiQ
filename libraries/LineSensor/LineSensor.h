@@ -6,13 +6,13 @@
 #include <Pins.h>
 #include <Wire.h> // check if it's necessary
 
-#define LOW 0
-#define MEDIUM 1
-#define HIGH 2
+#define C_LOW 0
+#define C_MEDIUM 1
+#define C_HIGH 2
 
 // threshold to determine the intensity of each RGB component
-#define LOW_THRESHOLD 100
-#define HIGH_THRESHOLD 155
+#define LOW_THRESHOLD 500
+#define HIGH_THRESHOLD 600
 
 class LineSensor {
 public:

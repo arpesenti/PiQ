@@ -6,7 +6,7 @@
 LineSensor lineSensor;
 
 void setup(){
-  
+  Serial.begin(9600);
   lineSensor.init();
 }
 
