@@ -1,3 +1,6 @@
+#ifndef RobotMotor_h
+#define RobotMotor_h
+
 /*******************************************************
     RobotMotor.h
     low level motor driver interface
@@ -35,3 +38,5 @@ void motorReverse(int motor, int speed);
 void motorStop(int motor);
 
 void motorBrake(int motor);
+
+#endif
