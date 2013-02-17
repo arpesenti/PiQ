@@ -21,8 +21,8 @@ void Motion::moveBackward(int speed) {
 	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
 	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
    
-	motorForward(MOTOR_LEFT, speedLeft);
-	motorForward(MOTOR_RIGHT, speedRight);
+	motorReverse(MOTOR_LEFT, speedLeft);
+	motorReverse(MOTOR_RIGHT, speedRight);
 
 }
 
