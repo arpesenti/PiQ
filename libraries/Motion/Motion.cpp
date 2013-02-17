@@ -31,8 +31,20 @@ void Motion::stop() {
 	motorStop(MOTOR_RIGHT);
 }
 
-void Motion::rotate(double angle, int speed) {
+void Motion::rotateLeft(int speed) {
+	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+   
+	motorReverse(MOTOR_LEFT, speedLeft);
+	motorForward(MOTOR_RIGHT, speedRight);
+}
 
+void Motion::rotateRight(int speed) {
+	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+   
+	motorForward(MOTOR_LEFT, speedLeft);
+	motorReverse(MOTOR_RIGHT, speedRight);
 }
 
 // TODO - calibrate

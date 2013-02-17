@@ -25,7 +25,8 @@ public:
 	void moveForward(int speed);
 	void moveBackward(int speed);
 	void stop();
-	void rotate(double angle, int speed);
+	void rotateLeft(int speed);
+	void rotateRight(int speed);
 	void penguinWalking(Position position);
 	
 };

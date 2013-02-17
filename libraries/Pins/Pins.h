@@ -3,6 +3,9 @@
 
 // TODO: NEED TO CHANGE DIGITAL PINS ACCORDINGLY TO TIMERS AND FREE PINS!
 
+// left motor : motor 1 on the motorShield
+// right motor : motor 2 on the motorShield
+
 #define IR_PIN 11
 #define LEFT_SERVO_PIN 9
 #define RIGHT_SERVO_PIN 10
