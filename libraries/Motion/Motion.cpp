@@ -1,6 +1,10 @@
 #include "Motion.h"
 
 Motion::Motion() {
+	
+}
+
+void Motion::init(){
 	motorBegin(MOTOR_LEFT);
 	motorBegin(MOTOR_RIGHT);
 }

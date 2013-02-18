@@ -4,16 +4,23 @@
 #include <Arduino.h>
 #include <Position.h>
 #include <Motion.h>
-#include <ProximitySensor.h>
+#include <DistanceSensor.h>
 #include <LineSensor.h>
 #include <Feet.h>
 #include <Remote.h>
+
+#define MOUSE_SCALE 85
+#define TIME_OUT 30000
+#define TOLERANCE_ANGLE 0.1
+#define DISTANCE_MARGIN 15
 
 class Robot {
 public:
 	Robot();
 	void init();
+	void start();
 	bool scanForEgg();
+	bool changePosition();
 	bool reachEgg();
 	bool catchEgg();
 	bool positioningTowardHome();
@@ -26,12 +33,14 @@ public:
 private:
 	Position position;
 	Motion motion;
-	ProximitySensor topSensor;
-	ProximitySensor bottomNearSensor;
-	ProximitySensor bottomFarSensor;
+	DistanceSensor highDistanceTop;
+	DistanceSensor highDistanceBottom;
+	DistanceSensor proximity;
 	LineSensor lineSensor;
 	Feet feet;
 	Remote remote;
+	void enterPanicState();
+  bool rotateToFreeDirection();
 };
 
 #endif

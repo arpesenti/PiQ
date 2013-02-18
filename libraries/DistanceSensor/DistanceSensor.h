@@ -4,6 +4,13 @@
 #include <Arduino.h>
 #include <Pins.h> 
 
+#define MAX_DIMENSION_SAMPLES 11
+
+struct sample{
+	int distance;
+	int value;
+};
+
 class DistanceSensor {
 public:
 	DistanceSensor();
@@ -13,6 +20,8 @@ public:
 	double distance();
 private:
 	int pin;
+	sample table[MAX_DIMENSION_SAMPLES]; 
+	int num_samples;
 
 };
 #endif

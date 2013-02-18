@@ -15,8 +15,8 @@ void setup(){
 }
 
 void loop(){
-  //Serial.println(prox.distance());
+  Serial.println(prox.distance());
   //Serial.println(highTop.distance());
-  Serial.println(highBottom.distance());
+  //Serial.println(highBottom.distance());
   delay(200);
 }

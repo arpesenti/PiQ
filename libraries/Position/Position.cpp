@@ -11,8 +11,7 @@ bool Position::init() {
 	// inizitialize mouse
 	mouseInit();
 	// initialize compass
-  float scale = 1.3;
-	int error = compass.SetScale(scale);
+  int error = compass.SetScale(COMPASS_SCALE);
 	if (error == 1) {
 		Serial.println(compass.GetErrorText(error));
 		return false;
@@ -58,6 +57,14 @@ void Position::update() {
 
 void Position::reset() {
 	// PRECONDITION: robot must have exactly at his back the home
+
+	// clear mouse buffer
+	mouse.write(0xeb); // ask data
+	mouse.read(); // ignore acknowledgement 
+	mouse.read(); // mstat
+	char dx = mouse.read();
+	char dy = mouse.read();
+
 	x = 0;
 	y = 0;
 }

@@ -11,6 +11,7 @@
 Motion motion;
 
 void setup(){
+	motion.init();
   Serial.begin(9600);
 }
 
