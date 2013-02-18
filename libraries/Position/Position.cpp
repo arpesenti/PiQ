@@ -11,20 +11,24 @@ bool Position::init() {
 	// inizitialize mouse
 	mouseInit();
 	// initialize compass
-	int error = compass.SetScale(COMPASS_SCALE);
-	if (error != 0) {
+  float scale = 1.3;
+	int error = compass.SetScale(scale);
+	if (error == 1) {
 		Serial.println(compass.GetErrorText(error));
 		return false;
 	}
 	error = 0;
 	error = compass.SetMeasurementMode(Measurement_Continuous);
-	if (error != 0) {
+	if (error == 1) {
 		Serial.println(compass.GetErrorText(error));
 		return false;
 	}
 	MagnetometerScaled scaled = compass.ReadScaledAxis();
 	relativeAngle = atan2(scaled.YAxis, scaled.XAxis) + COMPASS_DECLINATION; 
 	northAngle = fmod(PI/2 - relativeAngle, 2*PI); // the robot is placed initially at 90 degree
+  Serial.println("");
+	Serial.println("end of initialization of Position"); 
+	Serial.println("");
 	return true;
 }
 

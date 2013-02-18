@@ -5,12 +5,14 @@
 #include <IRremote.h>
 #include <Pins.h>
 
-#define WAIT_STRATEGY_BUTTON 0 //TODO remote code
-#define WAIT_STRATEGY 0
-#define NORMAL_STRATEGY_BUTTON 1 //TODO remote code
-#define NORMAL_STRATEGY 1
-#define PANIC_STRATEGY_BUTTON 2 //TODO remote code
-#define PANIC_STRATEGY 2
+#define WAIT_STRATEGY_BUTTON 284151855 // button off
+#define WAIT_STRATEGY '0'
+#define NORMAL_STRATEGY_BUTTON 284131965 // button 1
+#define NORMAL_STRATEGY '1'
+#define PANIC_STRATEGY_BUTTON 284136045 // button 2
+#define PANIC_STRATEGY '2'
+
+
 
 class Remote {
 public:

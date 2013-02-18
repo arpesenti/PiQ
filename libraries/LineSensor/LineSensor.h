@@ -11,8 +11,8 @@
 #define C_HIGH 2
 
 // threshold to determine the intensity of each RGB component
-#define LOW_THRESHOLD 500
-#define HIGH_THRESHOLD 600
+#define C_LOW_THRESHOLD 500
+#define C_HIGH_THRESHOLD 600
 
 class LineSensor {
 public:

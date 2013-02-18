@@ -8,6 +8,8 @@ char previousStrategy;
 void setup() {
   remote.init();
   previousStrategy = remote.strategy();
+  Serial.begin(9600);
+  Serial.println("end of init");
 }
 
 void loop() {

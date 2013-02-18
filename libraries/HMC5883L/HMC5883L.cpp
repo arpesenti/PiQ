@@ -50,6 +50,8 @@ MagnetometerScaled HMC5883L::ReadScaledAxis()
 
 int HMC5883L::SetScale(float gauss)
 {
+	Serial.print("Value arrived : ");
+	Serial.println(gauss);
 	uint8_t regValue = 0x00;
 	if(gauss == 0.88)
 	{
@@ -102,6 +104,7 @@ int HMC5883L::SetScale(float gauss)
 int HMC5883L::SetMeasurementMode(uint8_t mode)
 {
 	Write(ModeRegister, mode);
+  return 0;
 }
 
 void HMC5883L::Write(int address, int data)

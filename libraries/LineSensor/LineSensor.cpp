@@ -60,9 +60,9 @@ int LineSensor::centerReflectance() {
 }
 
 int LineSensor::level(int component_intensity){
-	if (component_intensity < LOW_THRESHOLD)
+	if (component_intensity < C_LOW_THRESHOLD)
 		return C_LOW;
-	if (component_intensity > HIGH_THRESHOLD)
+	if (component_intensity > C_HIGH_THRESHOLD)
 		return C_HIGH;
 	return C_MEDIUM;
 }

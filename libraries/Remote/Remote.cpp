@@ -10,7 +10,7 @@ void Remote::init() {
 
 void Remote::update() {
 	if (receiver.decode(&results)) { // have we received an IR signal?
-		int value = results.value;
+		unsigned long value = results.value;
 		if (value == NORMAL_STRATEGY_BUTTON)
 		{
 			currentStrategy = NORMAL_STRATEGY;
@@ -19,6 +19,8 @@ void Remote::update() {
 		} else if (value == PANIC_STRATEGY_BUTTON) {
 			currentStrategy = PANIC_STRATEGY;
 		}
+
+    receiver.resume();
 	} 
 }
 
