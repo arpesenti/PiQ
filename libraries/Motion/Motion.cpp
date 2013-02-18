@@ -9,8 +9,8 @@ Motion::Motion() {
 // N.B. speed is a value between 0 and 100 (representing a percentage)
 
 void Motion::moveForward(int speed) {
-	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
-	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+	int speedLeft = MIN_SPEED_LEFT + speed/100.0 * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed/100.0 * AVAILABLE_SPEED;
    
 	motorForward(MOTOR_LEFT, speedLeft);
 	motorForward(MOTOR_RIGHT, speedRight);
@@ -18,8 +18,8 @@ void Motion::moveForward(int speed) {
 }
 
 void Motion::moveBackward(int speed) {
-	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
-	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+	int speedLeft = MIN_SPEED_LEFT + speed/100.0 * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed/100.0 * AVAILABLE_SPEED;
    
 	motorReverse(MOTOR_LEFT, speedLeft);
 	motorReverse(MOTOR_RIGHT, speedRight);
@@ -32,23 +32,23 @@ void Motion::stop() {
 }
 
 void Motion::rotateLeft(int speed) {
-	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
-	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+	int speedLeft = MIN_SPEED_LEFT + speed/100.0 * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed/100.0 * AVAILABLE_SPEED;
    
 	motorReverse(MOTOR_LEFT, speedLeft);
 	motorForward(MOTOR_RIGHT, speedRight);
 }
 
 void Motion::rotateRight(int speed) {
-	int speedLeft = MIN_SPEED_LEFT + speed * AVAILABLE_SPEED;
-	int speedRight = MIN_SPEED_RIGHT + speed * AVAILABLE_SPEED;
+	int speedLeft = MIN_SPEED_LEFT + speed/100.0 * AVAILABLE_SPEED;
+	int speedRight = MIN_SPEED_RIGHT + speed/100.0 * AVAILABLE_SPEED;
    
 	motorForward(MOTOR_LEFT, speedLeft);
 	motorReverse(MOTOR_RIGHT, speedRight);
 }
 
 // TODO - calibrate
-void Motion::penguinWalking(Position position) {
+void Motion::penguinWalking(Position& position) {
 	float T = 5; // period
   
   for (float t = 0.0; t <= 70.0; t += 0.1){    

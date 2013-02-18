@@ -37,7 +37,7 @@ char LineSensor::color() {
 		return 'g';
 	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_LOW) // yellow
 		return 'y';
-	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == HIGH) // magenta
+	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_HIGH) // magenta
 		return 'm';
 	if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_HIGH) // cyan
 		return 'c';
