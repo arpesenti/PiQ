@@ -100,7 +100,7 @@ bool Robot::changePosition(){
 			motion.moveForward(speed);
 		}
 		position.update();
-		distance = abs( square(position.getX()-startX) + square(position.getY()-startY));
+		distance = sqrt( square(position.getX()-startX) + square(position.getY()-startY));
 	}
 	
 	motion.stop();
@@ -253,7 +253,7 @@ bool Robot::moveBackward(double distanceToDo){
 	motion.backward();
 	while(distance < distanceToDo_mouse){
 		position.update();
-		distance = abs( square(position.getX()-startX) + square(position.getY()-startY));
+		distance = sqrt( square(position.getX()-startX) + square(position.getY()-startY));
 	}
 	motion.stop();
 	position.update();

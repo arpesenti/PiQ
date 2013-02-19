@@ -39,9 +39,10 @@ void loop()
      double distance = 0.0;
      int x = position.getX();
      int y = position.getY();
-     while (distance < 5000) {
+     while (distance < 3000) {
       distance = sqrt(square((x-position.getX())) +  square((y-position.getY())));
       position.update();
+      output();
      }
      motorStop(MOTOR_LEFT);
      motorStop(MOTOR_RIGHT);
@@ -51,11 +52,14 @@ void loop()
      delay(1000);
      
  }
+ Serial.println("******************************************");
  output();
+ Serial.println("******************************************");
  
  // return home
  int x = position.getX();
  int y = position.getY();
+ Serial.println(atan2(y, x));
  double angleToFollow = fmod(atan2(y, x) - PI, 2*PI); 
  Serial.println("Angle to follow");
  Serial.println(angleToFollow);
@@ -74,12 +78,16 @@ void loop()
 void rotateToAngle(double angle) {
  double currentAngle = position.getOrientation();
  while (abs(currentAngle- angle) > PI/15) {
-   motorForward(MOTOR_LEFT, 60);
-   motorReverse(MOTOR_RIGHT, 60);
+   motorForward(MOTOR_LEFT, 70);
+   motorReverse(MOTOR_RIGHT, 70);
    position.update();
+   delay(10);
+   motorForward(MOTOR_LEFT, 55);
+   motorReverse(MOTOR_RIGHT, 55);
    currentAngle = position.getOrientation();
    Serial.println("Current angle");
    Serial.println(currentAngle);
+   delay(10);
  }  
  motorStop(MOTOR_LEFT);
  motorStop(MOTOR_RIGHT);
