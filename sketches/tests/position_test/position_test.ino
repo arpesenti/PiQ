@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <AFMotor.h>
 #include <RobotMotor.h>
+#include <Pins.h>
 
 Position position;
 int speed;
@@ -28,35 +29,20 @@ void setup()
 
 void loop()
 {
- for (int count = 0; count < 5; count += 1)
+ for (int count = 0; count < 1; count += 1)
  {
      speed = random(50,100);
      Serial.println("Start motor with speed");
      Serial.println(speed);
      motorForward(MOTOR_LEFT, speed);
      motorForward(MOTOR_RIGHT, speed);
-     for(int time = 0; time < stepTime; time += 20)
-     { 
-       delay(20);
-       position.update();
-       //output();
+     double distance = 0.0;
+     int x = position.getX();
+     int y = position.getY();
+     while (distance < 5000) {
+      distance = sqrt(square((x-position.getX())) +  square((y-position.getY())));
+      position.update();
      }
-     motorStop(MOTOR_LEFT);
-     motorStop(MOTOR_RIGHT);
-     position.update();
-     delay(50);
-     position.update();
-     delay(1000);
-     
-     // rotate
-     motorForward(MOTOR_LEFT, speed);
-     motorReverse(MOTOR_RIGHT, speed);
-     for(int time = 0; time < rotationalTime; time += 10)
-     {
-       delay(10);
-       position.update();
-       output();
-      }
      motorStop(MOTOR_LEFT);
      motorStop(MOTOR_RIGHT);
      position.update();
@@ -75,7 +61,7 @@ void loop()
  Serial.println(angleToFollow);
  rotateToAngle(angleToFollow);
  double distance = sqrt(square(position.getX())+square(position.getY()));
- while (abs(distance) > 3) {
+ while (abs(distance) > 100) {
      motorForward(MOTOR_LEFT, 60);
      motorForward(MOTOR_RIGHT, 60);
      position.update();
@@ -87,7 +73,7 @@ void loop()
 
 void rotateToAngle(double angle) {
  double currentAngle = position.getOrientation();
- while (abs(currentAngle- angle) > PI/30) {
+ while (abs(currentAngle- angle) > PI/15) {
    motorForward(MOTOR_LEFT, 60);
    motorReverse(MOTOR_RIGHT, 60);
    position.update();
