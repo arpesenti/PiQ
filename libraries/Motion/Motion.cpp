@@ -52,21 +52,21 @@ void Motion::rotateRight(int speed) {
 }
 
 // TODO - calibrate
-void Motion::penguinWalking(Position& position) {
-	float T = 5; // period
+// void Motion::penguinWalking(Position& position) {
+// 	float T = 5; // period
   
-  for (float t = 0.0; t <= 70.0; t += 0.1){    
-  	motorForward(MOTOR_LEFT, MIN_SPEED_LEFT + AVAILABLE_SPEED * cos(2*3.14/T*t));
-  	motorForward(MOTOR_RIGHT, MIN_SPEED_RIGHT +  AVAILABLE_SPEED * sin(2*3.14/T*t));
-		position.update();
-		delay(10);
-		position.update();
-		delay(10);
-		position.update();       
-  }
+//   for (float t = 0.0; t <= 70.0; t += 0.1){    
+//   	motorForward(MOTOR_LEFT, MIN_SPEED_LEFT + AVAILABLE_SPEED * cos(2*3.14/T*t));
+//   	motorForward(MOTOR_RIGHT, MIN_SPEED_RIGHT +  AVAILABLE_SPEED * sin(2*3.14/T*t));
+// 		position.update();
+// 		delay(10);
+// 		position.update();
+// 		delay(10);
+// 		position.update();       
+//   }
 	
-	stop();
-	position.update();
-	delay(10);
-	position.update();
-}
+// 	stop();
+// 	position.update();
+// 	delay(10);
+// 	position.update();
+// }

@@ -5,7 +5,7 @@ Robot::Robot() {
 }
 
 void Robot::init() {
- 	motion.init();
+	motion.init();
 	highDistanceTop.initHighDistanceTop();
 	highDistanceBottom.initHighDistanceBottom();
 	proximity.initProximity();
@@ -140,7 +140,9 @@ bool Robot::escapeFromPanic() {
 
 
 void Robot::enterPanicState(){
-	state = PANIC;
+	// TODO : does not see here the global variable state
+
+	//state = PANIC;
 }
 
 bool Robot::rotateToFreeDirection(){
@@ -154,7 +156,7 @@ bool Robot::rotateToFreeDirection(){
 		double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
 
 		bool switchRotation = false;
-		motor.rotateLeft(speed); // 10% speed
+		motion.rotateLeft(speed); // 10% speed
 		while (highDistanceTop.distance() < distance && 
 					(arriveAngle >= 0 ? 
 						(position.getOrientation() < arriveAngleMod || position.getOrientation() > startAngle):
@@ -164,25 +166,25 @@ bool Robot::rotateToFreeDirection(){
 				if(!switchRotation){
 					switchRotation = true;
 					startTime = millis();
-					motor.rotateRight(speed);
+					motion.rotateRight(speed);
 				}else{
 					break;
 				}
 			}
 			if ( millis() - startTime > TIME_OUT ){
 				if(switchRotation){	
-					motor.stop();		
+					motion.stop();		
 					enterPanicState();
 					return false;
 				}else{
 					switchRotation = true;
 					startTime = millis();
-					motor.rotateRight(speed);
+					motion.rotateRight(speed);
 				}
 			}
 		}
 		
-		motor.stop();
+		motion.stop();
 		position.update();
 
 		if (highDistanceTop.distance() >= distance){
@@ -198,7 +200,7 @@ bool Robot::rotateToFreeDirection(){
 }
 	
 bool Robot::isOnBlackLine(){
-	return lineSensor.color == 'k';
+	return lineSensor.color() == 'k';
 }
 
 bool Robot::rotateRight(double angleRad){
@@ -208,7 +210,7 @@ bool Robot::rotateRight(double angleRad){
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
 		if ( millis() - startTime > TIME_OUT ){
-			motor.stop();		
+			motion.stop();		
 			enterPanicState();
 			return false;
 		}
@@ -228,7 +230,7 @@ bool Robot::rotateLeft(double angleRad){
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
 		if ( millis() - startTime > TIME_OUT ){
-			motor.stop();		
+			motion.stop();		
 			enterPanicState();
 			return false;
 		}
@@ -240,8 +242,8 @@ bool Robot::rotateLeft(double angleRad){
 	return true;
 }
 
-bool Robot::canMoveForward(){
-	return highDistanceTop.distance > 30;
+bool Robot::canMoveForward() {
+	return highDistanceTop.distance() > 30;
 }
 
 bool Robot::moveBackward(double distanceToDo){
@@ -249,8 +251,8 @@ bool Robot::moveBackward(double distanceToDo){
 	int startX = position.getX();
 	int startY = position.getY();
 	double distance = 0.0;
-	
-	motion.backward();
+	int speed = 20;
+	motion.moveBackward(speed);
 	while(distance < distanceToDo_mouse){
 		position.update();
 		distance = sqrt( square(position.getX()-startX) + square(position.getY()-startY));
@@ -260,3 +262,37 @@ bool Robot::moveBackward(double distanceToDo){
 	return true;
 	
 }
+
+// void Robot::calibrateMagnetometer() {
+	
+// 	int speed = 20;
+// 	// reach 0 degree
+// 	motion.rotateLeft(speed);
+// 	while (position.getRawOrientation() > PI/90) {
+// 		position.update();
+// 	}
+// 	// calculate time of complete rotation
+// 	unsigned long startingTime = millis();
+// 	while (position.getRawOrientation() > PI/90) {
+// 		position.update();
+// 	}
+// 	unsigned long rotationTime = millis() - startingTime;
+// 	int period = rotationTime / NUMBER_OF_SAMPLES;
+// 	int margin = 5; // milliseconds of margin
+// 	// samples
+// 	int i = 1;
+// 	short angles[NUMBER_OF_SAMPLES];
+// 	short measuredAngles[NUMBER_OF_SAMPLES];
+// 	startingTime = millis();
+// 	while (position.getRawOrientation() > PI/90) {
+// 		position.update();
+// 		if (abs((millis() - startingTime) - i * period) < margin)
+// 		{
+// 			measuredAngles[i-1] = (short) (position.getRawOrientation());
+// 			angles[i-1] = (short) (2 * PI * i * period / rotationTime);
+// 			i = i + 1;
+// 		}
+// 	}
+// 	motion.stop();
+// 	position.calibrate(angles, measuredAngles);
+// }

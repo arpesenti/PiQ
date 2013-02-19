@@ -14,6 +14,7 @@
 #define TOLERANCE_ANGLE 0.1
 #define DISTANCE_MARGIN 15
 
+
 class Robot {
 public:
 	Robot();
@@ -30,6 +31,7 @@ public:
 	bool deposit();
 	bool newInit();
 	bool escapeFromPanic();
+	//void calibrateMagnetometer();
 private:
 	Position position;
 	Motion motion;
@@ -40,7 +42,13 @@ private:
 	Feet feet;
 	Remote remote;
 	void enterPanicState();
-  bool rotateToFreeDirection();
+    bool rotateToFreeDirection();
+    bool moveBackward(double distanceToDo);
+    bool canMoveForward();
+    bool rotateLeft(double angleRad);
+    bool rotateRight(double angleRad);
+    bool isOnBlackLine();
+
 };
 
 #endif

@@ -5,12 +5,16 @@
 #include <LineSensor.h>
 #include <Feet.h>
 #include <Remote.h>
+#include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
 #include <Servo.h>
 #include <IRremote.h>
 #include <ADJDS311.h>
 #include <Wire.h>
+#include <AFMotor.h>
+#include <RobotMotor.h>
+#include <EEPROM.h>
 
 // States
 #define WAIT 0
@@ -48,7 +52,7 @@ void loop() {
 				changeStateTo(EXPLORE_CHANGE_POSITION);
 			break;
 		case PANIC:
-			
+			break;
 						
 
 

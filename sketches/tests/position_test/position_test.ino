@@ -82,9 +82,9 @@ void rotateToAngle(double angle) {
    motorForward(MOTOR_LEFT, 70);
    motorReverse(MOTOR_RIGHT, 70);
    position.update();
-   delay(2);
-   motorStop(MOTOR_LEFT);
-   motorStop(MOTOR_RIGHT);
+   delay(10);
+   motorForward(MOTOR_LEFT, 55);
+   motorReverse(MOTOR_RIGHT, 55);
    currentAngle = position.getOrientation();
    Serial.println("Current angle");
    Serial.println(currentAngle);
