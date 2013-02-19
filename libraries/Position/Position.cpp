@@ -24,7 +24,7 @@ bool Position::init() {
 	}
 	MagnetometerScaled scaled = compass.ReadScaledAxis();
 	relativeAngle = atan2(scaled.YAxis, scaled.XAxis) + COMPASS_DECLINATION; 
-	northAngle = fmod(PI/2 - relativeAngle, 2*PI); // the robot is placed initially at 90 degree
+	northAngle = fmod(2*PI + PI/2 - relativeAngle, 2*PI); // the robot is placed initially at 90 degree
   Serial.println("");
 	Serial.println("end of initialization of Position"); 
 	Serial.println("");
@@ -40,7 +40,7 @@ int Position::getY() {
 }
 
 double Position::getOrientation() {
-	return fmod(northAngle + relativeAngle, 2*PI);
+	return fmod(2*PI + northAngle + relativeAngle, 2*PI);
 }
 
 void Position::update() {
