@@ -34,7 +34,7 @@ void Robot::start(){
 bool Robot::scanForEgg() {
 	double startAngle = position.getOrientation();
 	double arriveAngle = startAngle - TOLERANCE_ANGLE;
-	double arriveAngleMod = fmod(arriveAngle, 2*PI);
+	double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
 	double distanceBottom;
 	
 	int speed = 10;	
@@ -151,7 +151,7 @@ bool Robot::rotateToFreeDirection(){
 		unsigned long startTime = millis();
 		double startAngle = position.getOrientation();
 		double arriveAngle = startAngle - TOLERANCE_ANGLE;
-		double arriveAngleMod = fmod(arriveAngle, 2*PI);
+		double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
 
 		bool switchRotation = false;
 		motor.rotateLeft(speed); // 10% speed
@@ -203,7 +203,7 @@ bool Robot::isOnBlackLine(){
 
 bool Robot::rotateRight(double angleRad){
 	unsigned long startTime = millis();
-	double toAngle = fmod(position.getOrientation() - angleRad, 2*PI);
+	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
 	motion.rotateRight(10);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
@@ -223,7 +223,7 @@ bool Robot::rotateRight(double angleRad){
 
 bool Robot::rotateLeft(double angleRad){
 	unsigned long startTime = millis();
-	double toAngle = fmod(position.getOrientation() + angleRad, 2*PI);
+	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
 	motion.rotateLeft(10);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
