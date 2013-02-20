@@ -22,7 +22,7 @@ public:
 	void reset();
 	void update();
 	bool init();
-	void calibrate(Motion &motion);
+	void calibrate(Motion &motion, bool newCalibration);
 private:
 	float updateAngle();
 	void mouseInit();

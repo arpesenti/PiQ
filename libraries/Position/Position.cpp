@@ -13,18 +13,6 @@ Position::Position(): mouse(MOUSE_CLOCK_PIN, MOUSE_DATA_PIN), compass() {
 bool Position::init() {
 	// inizitialize mouse
 	mouseInit();
-	// initialize compass
-  	int error = compass.SetScale(COMPASS_SCALE);
-	if (error == 1) {
-		Serial.println(compass.GetErrorText(error));
-		return false;
-	}
-	error = 0;
-	error = compass.SetMeasurementMode(Measurement_Continuous);
-	if (error == 1) {
-		Serial.println(compass.GetErrorText(error));
-		return false;
-	}
 	readCal(); // TODO: check if calibration is already in EEPROM. If not initialize xMax,.. to 0
 	relativeAngle = updateAngle();
 	northAngle = fmod(2*PI + PI/2 - relativeAngle, 2*PI);
@@ -97,22 +85,36 @@ void Position::mouseInit() {
   delayMicroseconds(100);
 }
 
-void Position::calibrate(Motion &motion) {
-	int speed = 20;
-	motion.rotateLeft(speed);
-	for (int index = 0; index < 16; index++)
-      {
-          for(int x=0;x<100;x++)  //continualy read the raw axis data while waiting for operator to slowly rotate compass to next position
-          {
-            MagnetometerScaled scaled = compass.ReadScaledAxis();
-            compassMaxMin(scaled.XAxis,scaled.YAxis);  //look for max and min values
-            delay(20);
-          }
-          
-      } 
-    motion.stop();
-    calcScaleFactor_Offset();   
-    storeCal();    //save the calculated x & y offset and scale factor
+void Position::calibrate(Motion &motion, bool newCalibration) {
+	// initialize compass
+  	int error = compass.SetScale(COMPASS_SCALE);
+	if (error == 1) {
+		Serial.println(compass.GetErrorText(error));
+		return false;
+	}
+	error = 0;
+	error = compass.SetMeasurementMode(Measurement_Continuous);
+	if (error == 1) {
+		Serial.println(compass.GetErrorText(error));
+		return false;
+	}
+	if (newCalibration) {
+		int speed = 20;
+		motion.rotateLeft(speed);
+		for (int index = 0; index < 16; index++) {
+       	  	for(int x=0;x<100;x++) {  //continualy read the raw axis data while waiting for operator to slowly rotate compass to next position
+       	  		MagnetometerScaled scaled = compass.ReadScaledAxis();
+            	compassMaxMin(scaled.XAxis,scaled.YAxis);  //look for max and min values
+            	delay(20);
+ 		   	}  
+ 		}
+ 		motion.stop();
+    	calcScaleFactor_Offset();   
+    	storeCal();    //save the calculated x & y offset and scale factor
+     } else {
+     	readCal();
+     } 
+    
 }
 
 void Position::compassMaxMin(int xRaw, int yRaw)

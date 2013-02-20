@@ -12,9 +12,9 @@ Position position;
 Motion motion;
 
 void setup(){
-  position.init();
   motion.init();
-  position.calibrate(motion);
+  position.calibrate(motion, true);
+  position.init();
   Serial.begin(9600);
   Wire.begin();  
 }
