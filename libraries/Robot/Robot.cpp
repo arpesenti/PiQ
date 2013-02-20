@@ -6,9 +6,9 @@ Robot::Robot() {
 
 void Robot::init() {
 	motion.init();
-	//highDistanceTop.initHighDistanceTop();
-	//highDistanceBottom.initHighDistanceBottom();
-	//proximity.initProximity();
+	highDistanceTop.initHighDistanceTop();
+	highDistanceBottom.initHighDistanceBottom();
+	proximity.initProximity();
 	//lineSensor.init();
 	//feet.init();
 	//remote.init();
@@ -31,8 +31,8 @@ void Robot::start(){
 	motion.stop();
 	position.reset();
 	Serial.println(position.getX());
-    Serial.println(position.getY());
-    Serial.println(position.getOrientation());
+  Serial.println(position.getY());
+  Serial.println(position.getOrientation());
 }
 
 // scan rotating left
@@ -116,7 +116,82 @@ bool Robot::changePosition(){
 
 
 bool Robot::reachEgg() {
+	double oldDistanceBottom = highDistanceBottom.distance();
+	double newDistanceBottom = oldDistanceBottom;
+	double distanceProximity = proximity.distance();
+	bool waitForPassingRobot = false;
+	double initialOrientation = position.getOrientation();
 
+	//test**********************************************
+	newDistanceBottom = 20;
+	//******************************************************
+	
+	if (newDistanceBottom > 30 && distanceProximity > 30){
+		while(newDistanceBottom < 30){
+			moveForwardKeepingDirection(initialOrientation);
+			position.update();
+			if(newDistanceBottom - oldDistanceBottom > 1){
+				motion.stop();
+				position.update();
+				return false;
+			}
+			oldDistanceBottom = newDistanceBottom;
+			newDistanceBottom = highDistanceBottom.distance();
+			
+			double distanceTop = highDistanceTop.distance();
+			if(distanceTop - newDistanceBottom < DISTANCE_MARGIN){
+				motion.stop();
+				position.update();
+				if(!waitForPassingRobot){
+					waitForPassingRobot = true;
+					delay(3000);
+					continue;
+				}else
+					return false;
+			}
+		}
+	}
+
+
+	double oldProx= proximity.distance();
+	double newProx = oldProx;
+	
+	initialOrientation = position.getOrientation();
+	Serial.print("prox distance: ");	
+	Serial.println(newProx);
+	
+	while(newProx > 5){
+		moveForwardKeepingDirection(initialOrientation);
+		position.update();
+
+
+		if (newProx >= 35 && oldProx >= 35){
+			motion.stop();
+			position.update();			
+			return false;
+		}
+
+		if(newProx - oldProx > 1 ){
+			motion.stop();
+			position.update();
+			if(tryToRefindEgg() == false)
+				return false;
+			else
+				initialOrientation = position.getOrientation();
+			
+		}
+
+		oldProx = newProx;
+		newProx = proximity.distance();		
+		Serial.print("prox distance: ");	
+		Serial.println(newProx);
+
+	}
+	
+	motion.stop();
+	position.update();
+	return true;
+	
 }
 bool Robot::catchEgg() {
 
@@ -208,19 +283,23 @@ bool Robot::isOnBlackLine(){
 	return lineSensor.color() == 'k';
 }
 
+
+// rotate right -> + angleRad
 bool Robot::rotateRight(double angleRad){
+	
+	Serial.println("enter rotate right");
 	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
-	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
+	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
 	bool decelerated = false;
-	motion.rotateRight(10);
+	motion.rotateRight(ACCELERATION_SPEED);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
-		//Serial.println(position.getOrientation());
+		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
 		//Serial.println(millisFromStart);
 		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
-			motion.rotateRight(-10);
+			motion.rotateRight(CRUISE_SPEED);
 			//Serial.println("*****************");
 			decelerated = true;
 		}
@@ -229,30 +308,39 @@ bool Robot::rotateRight(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (isOnBlackLine())
-		 	return rotateLeft(angleRad);
+		//if (isOnBlackLine())
+		 //	return rotateLeft(angleRad);
 	}
 	motion.stop();
 	position.update();
-	//Serial.println("Arriving angle");
-    //Serial.println(position.getOrientation());
+	Serial.println("Arriving angle");
+  Serial.println(position.getOrientation());
 	return true;
 	
 }
 
+// rotate left -> - angleRad
 bool Robot::rotateLeft(double angleRad){
+	Serial.println("enter rotate left");
 	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
-	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
+	double initialOrientation = position.getOrientation();
+	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
+	
+	Serial.print("initial orientation : ");
+	Serial.println(initialOrientation);
+	Serial.print("toAngle : ");
+	Serial.println(toAngle);
+
 	bool decelerated = false;
-	motion.rotateLeft(10);
+	motion.rotateLeft(ACCELERATION_SPEED);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
-		//Serial.println(position.getOrientation());
+		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
 		//Serial.println(millisFromStart);
 		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
-			motion.rotateRight(-10);
+			motion.rotateLeft(CRUISE_SPEED);
 			//Serial.println("*****************");
 			decelerated = true;
 		}
@@ -261,18 +349,18 @@ bool Robot::rotateLeft(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (isOnBlackLine())
-			return rotateRight(angleRad);
+		//if (isOnBlackLine())
+		//	return rotateRight(angleRad);
 	}
 	motion.stop();
 	position.update();
-	//Serial.println("Arriving angle");
-    //Serial.println(position.getOrientation());
+	Serial.println("Arriving angle");
+  Serial.println(position.getOrientation());
 	return true;
 }
 
 bool Robot::canMoveForward() {
-	return highDistanceTop.distance() > 30;
+	return highDistanceTop.distance() > 25;
 }
 
 bool Robot::moveBackward(double distanceToDo){
@@ -292,4 +380,48 @@ bool Robot::moveBackward(double distanceToDo){
 	
 }
 
+bool Robot::moveForwardKeepingDirection(double angleToKeep){
+	double currentAngle =  position.getOrientation() ;
+	
+	if ( currentAngle < PI/2 && angleToKeep > 3/2*PI)
+		angleToKeep -= 2*PI;
+	else if ( angleToKeep < PI/2 && currentAngle > 3/2*PI)
+		currentAngle -= 2*PI;
+	double error = angleToKeep - currentAngle;
+	Serial.print("orientation: ");
+	Serial.println(currentAngle);
+	Serial.print("angleToKeep: ");
+	Serial.println(angleToKeep);
+	Serial.print("error: ");
+	Serial.println(error);
+	
+	position.update();
+	motion.moveForwardWithDrift(5, error * 50);	
 
+}
+
+
+bool Robot::tryToRefindEgg(){
+	Serial.println("enter in try to refind egg");
+	double deltaAngleRad = 0.3;
+
+	rotateLeft(deltaAngleRad);
+	Serial.println("end rotation");
+	if (proximity.distance() < 30)
+		return true;
+	rotateLeft(deltaAngleRad);
+	Serial.println("end rotation");
+	if (proximity.distance() < 30)
+		return true;
+	rotateRight(3 * deltaAngleRad);
+	Serial.println("end rotation");
+	if (proximity.distance() < 30)
+		return true;
+	rotateRight(deltaAngleRad);
+	Serial.println("end rotation");
+	if (proximity.distance() < 30)
+		return true;
+	return false;
+	
+	
+}

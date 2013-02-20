@@ -16,6 +16,10 @@
 #define ACCELERATION_TIME 50
 
 
+
+#define ACCELERATION_SPEED 20
+#define CRUISE_SPEED 10
+
 class Robot {
 public:
 	Robot();
@@ -44,12 +48,13 @@ private:
 	Feet feet;
 	Remote remote;
 	void enterPanicState();
-    bool rotateToFreeDirection();
-    bool moveBackward(double distanceToDo);
-    bool canMoveForward();
-    bool rotateLeft(double angleRad);
-    
-    bool isOnBlackLine();
+  bool rotateToFreeDirection();
+  bool moveBackward(double distanceToDo);
+  bool canMoveForward();
+  bool rotateLeft(double angleRad);
+  bool tryToRefindEgg();
+  bool isOnBlackLine();
+	bool moveForwardKeepingDirection(double orientation);
 
 };
 

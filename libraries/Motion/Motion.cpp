@@ -59,12 +59,13 @@ void Motion::setMinSpeed(int left, int right) {
 	availableSpeed = 100 - (minSpeedRight > minSpeedLeft ? minSpeedRight: minSpeedLeft);
 }
 
+// positive drift -> rotate left
 void Motion::moveForwardWithDrift(int speed, int drift) {
-	int speedLeft   =  minSpeedLeft + constrain(speed - (drift / DAMPING), 0, 100) / 100 * availableSpeed;
-  	int speedRight  =  minSpeedRight + constrain(speed + (drift / DAMPING), 0, 100) / 100 * availableSpeed;
+	int speedLeft   =  minSpeedLeft + constrain(speed/100.0 * availableSpeed - (drift / DAMPING), 0, availableSpeed); 
+  int speedRight  =  minSpeedRight + constrain(speed/100.0 * availableSpeed + (drift / DAMPING), 0, availableSpeed);
 
  	motorForward(MOTOR_LEFT, speedLeft);
-  	motorForward(MOTOR_RIGHT, speedRight); 
+  motorForward(MOTOR_RIGHT, speedRight); 
 }
 
 // TODO - calibrate

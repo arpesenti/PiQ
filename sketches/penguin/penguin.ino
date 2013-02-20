@@ -36,14 +36,20 @@ Robot robot;
 int state;
 
 void setup() {
-	state = WAIT;
+        Serial.begin(9600);
+        Wire.begin();
+	state = EXPLORE_REACHEGG;
 	robot.init();
+        robot.start();
+        delay(3000);
+        Serial.println("init");
   
 }
 
 void loop() {
 	switch(state){
 		case WAIT: 
+                      break;
 			//update strategy
 		case EXPLORE_SCAN:
 			if(robot.scanForEgg())
@@ -51,6 +57,12 @@ void loop() {
 			else
 				changeStateTo(EXPLORE_CHANGE_POSITION);
 			break;
+                case EXPLORE_REACHEGG:
+                      Serial.println("start reach egg");
+                      delay(2000);
+                       Serial.println(robot.reachEgg());
+                        state = WAIT;
+                        break;
 		case PANIC:
 			break;
 						
