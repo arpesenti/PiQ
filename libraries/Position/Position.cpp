@@ -90,13 +90,11 @@ void Position::calibrate(Motion &motion, bool newCalibration) {
   	int error = compass.SetScale(COMPASS_SCALE);
 	if (error == 1) {
 		Serial.println(compass.GetErrorText(error));
-		return false;
 	}
 	error = 0;
 	error = compass.SetMeasurementMode(Measurement_Continuous);
 	if (error == 1) {
 		Serial.println(compass.GetErrorText(error));
-		return false;
 	}
 	if (newCalibration) {
 		int speed = 20;
