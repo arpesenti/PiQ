@@ -13,12 +13,14 @@
 // TODO: adjust these 2 values in order to have the robot that goes straightforward at minimum speed
 #define MIN_SPEED_LEFT 45
 #define MIN_SPEED_RIGHT 50
+#define DAMPING 5 //1 is most sensitive, range 1 to 1023
 
 class Motion {
 public:
 	Motion();
 	void init();
 	void moveForward(int speed);
+	void moveForwardWithDrift(int speed, int drift);
 	void moveBackward(int speed);
 	void stop();
 	void rotateLeft(int speed);
