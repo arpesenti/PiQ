@@ -97,8 +97,8 @@ void Position::calibrate(Motion &motion, bool newCalibration) {
 		Serial.println(compass.GetErrorText(error));
 	}
 	if (newCalibration) {
-		int speed = 20;
-		motion.rotateLeft(speed);
+		int speed = 2;
+		motion.rotateRight(speed);
 		for (int index = 0; index < 16; index++) {
        	  	for(int x=0;x<100;x++) {  //continualy read the raw axis data while waiting for operator to slowly rotate compass to next position
        	  		MagnetometerScaled scaled = compass.ReadScaledAxis();
@@ -112,7 +112,11 @@ void Position::calibrate(Motion &motion, bool newCalibration) {
      } else {
      	readCal();
      } 
-    
+	Serial.println("Calibration parameters magnetometer");
+	Serial.println(xScaleFactor);
+	Serial.println(yScaleFactor);
+	Serial.println(compassXOffset);
+	Serial.println(compassYOffset);
 }
 
 void Position::compassMaxMin(int xRaw, int yRaw)

@@ -13,6 +13,7 @@
 #define TIME_OUT 30000
 #define TOLERANCE_ANGLE 0.1
 #define DISTANCE_MARGIN 15
+#define ACCELERATION_TIME 50
 
 
 class Robot {
@@ -31,7 +32,8 @@ public:
 	bool deposit();
 	bool newInit();
 	bool escapeFromPanic();
-	//void calibrateMagnetometer();
+	// temporary
+	bool rotateRight(double angleRad);
 private:
 	Position position;
 	Motion motion;
@@ -46,7 +48,7 @@ private:
     bool moveBackward(double distanceToDo);
     bool canMoveForward();
     bool rotateLeft(double angleRad);
-    bool rotateRight(double angleRad);
+    
     bool isOnBlackLine();
 
 };

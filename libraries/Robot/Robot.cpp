@@ -6,12 +6,13 @@ Robot::Robot() {
 
 void Robot::init() {
 	motion.init();
-	highDistanceTop.initHighDistanceTop();
-	highDistanceBottom.initHighDistanceBottom();
-	proximity.initProximity();
-	lineSensor.init();
-	feet.init();
-	remote.init();
+	//highDistanceTop.initHighDistanceTop();
+	//highDistanceBottom.initHighDistanceBottom();
+	//proximity.initProximity();
+	//lineSensor.init();
+	//feet.init();
+	//remote.init();
+	position.calibrate(motion, false);
 }
 
 void Robot::start(){
@@ -19,7 +20,7 @@ void Robot::start(){
 	int speed = 25; // 25%
 	motion.moveForward(speed);
 	unsigned long startTime = millis();
-	while (abs(position.getY() * MOUSE_SCALE - 30) ){
+	while (abs(position.getY() / MOUSE_SCALE - 30) ){
 		position.update();
 		if ( millis() - startTime > TIME_OUT){
 			enterPanicState();
@@ -27,7 +28,11 @@ void Robot::start(){
 		}
 
 	}
+	motion.stop();
 	position.reset();
+	Serial.println(position.getX());
+    Serial.println(position.getY());
+    Serial.println(position.getOrientation());
 }
 
 // scan rotating left
@@ -205,31 +210,53 @@ bool Robot::isOnBlackLine(){
 
 bool Robot::rotateRight(double angleRad){
 	unsigned long startTime = millis();
+	unsigned long millisFromStart = 0;
 	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
+	bool decelerated = false;
 	motion.rotateRight(10);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
-		if ( millis() - startTime > TIME_OUT ){
+		//Serial.println(position.getOrientation());
+		millisFromStart = millis() - startTime;
+		//Serial.println(millisFromStart);
+		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
+			motion.rotateRight(-10);
+			//Serial.println("*****************");
+			decelerated = true;
+		}
+		if ( millisFromStart  > TIME_OUT ){
 			motion.stop();		
 			enterPanicState();
 			return false;
 		}
 		if (isOnBlackLine())
-			return rotateLeft(angleRad);
+		 	return rotateLeft(angleRad);
 	}
 	motion.stop();
 	position.update();
+	//Serial.println("Arriving angle");
+    //Serial.println(position.getOrientation());
 	return true;
 	
 }
 
 bool Robot::rotateLeft(double angleRad){
 	unsigned long startTime = millis();
+	unsigned long millisFromStart = 0;
 	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
+	bool decelerated = false;
 	motion.rotateLeft(10);
 	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
 		position.update();
-		if ( millis() - startTime > TIME_OUT ){
+		//Serial.println(position.getOrientation());
+		millisFromStart = millis() - startTime;
+		//Serial.println(millisFromStart);
+		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
+			motion.rotateRight(-10);
+			//Serial.println("*****************");
+			decelerated = true;
+		}
+		if ( millisFromStart > TIME_OUT ){
 			motion.stop();		
 			enterPanicState();
 			return false;
@@ -239,6 +266,8 @@ bool Robot::rotateLeft(double angleRad){
 	}
 	motion.stop();
 	position.update();
+	//Serial.println("Arriving angle");
+    //Serial.println(position.getOrientation());
 	return true;
 }
 
@@ -263,36 +292,4 @@ bool Robot::moveBackward(double distanceToDo){
 	
 }
 
-// void Robot::calibrateMagnetometer() {
-	
-// 	int speed = 20;
-// 	// reach 0 degree
-// 	motion.rotateLeft(speed);
-// 	while (position.getRawOrientation() > PI/90) {
-// 		position.update();
-// 	}
-// 	// calculate time of complete rotation
-// 	unsigned long startingTime = millis();
-// 	while (position.getRawOrientation() > PI/90) {
-// 		position.update();
-// 	}
-// 	unsigned long rotationTime = millis() - startingTime;
-// 	int period = rotationTime / NUMBER_OF_SAMPLES;
-// 	int margin = 5; // milliseconds of margin
-// 	// samples
-// 	int i = 1;
-// 	short angles[NUMBER_OF_SAMPLES];
-// 	short measuredAngles[NUMBER_OF_SAMPLES];
-// 	startingTime = millis();
-// 	while (position.getRawOrientation() > PI/90) {
-// 		position.update();
-// 		if (abs((millis() - startingTime) - i * period) < margin)
-// 		{
-// 			measuredAngles[i-1] = (short) (position.getRawOrientation());
-// 			angles[i-1] = (short) (2 * PI * i * period / rotationTime);
-// 			i = i + 1;
-// 		}
-// 	}
-// 	motion.stop();
-// 	position.calibrate(angles, measuredAngles);
-// }
+

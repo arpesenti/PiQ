@@ -5,6 +5,8 @@
 #include <AFMotor.h>
 #include <RobotMotor.h>
 #include <Pins.h>
+#include <Motion.h>
+#include <EEPROM.h>
 
 Position position;
 int speed;
@@ -15,6 +17,8 @@ void setup()
 {
   Serial.begin(9600);
   Wire.begin();
+  Motion motion;
+  position.calibrate(motion, false);
   Serial.println("Init setup");
   bool succesful = position.init();
   if (!succesful) {
@@ -34,8 +38,8 @@ void loop()
      speed = random(50,100);
      Serial.println("Start motor with speed");
      Serial.println(speed);
-     motorForward(MOTOR_LEFT, speed);
-     motorForward(MOTOR_RIGHT, speed);
+     //motorForward(MOTOR_LEFT, speed);
+     //motorForward(MOTOR_RIGHT, speed);
      double distance = 0.0;
      int x = position.getX();
      int y = position.getY();
@@ -67,8 +71,8 @@ void loop()
  output();
  double distance = sqrt(square(position.getX())+square(position.getY()));
  while (abs(distance) > 100) {
-     motorForward(MOTOR_LEFT, 60);
-     motorForward(MOTOR_RIGHT, 60);
+     //motorForward(MOTOR_LEFT, 50);
+     //motorForward(MOTOR_RIGHT, 53);
      position.update();
      distance = sqrt(square(position.getX())+square(position.getY()));
  }
@@ -78,13 +82,13 @@ void loop()
 
 void rotateToAngle(double angle) {
  double currentAngle = position.getOrientation();
- while (abs(currentAngle- angle) > PI/15) {
-   motorForward(MOTOR_LEFT, 70);
-   motorReverse(MOTOR_RIGHT, 70);
+ while (abs(currentAngle- angle) > 0.1) {
+   //motorForward(MOTOR_LEFT, 50);
+   //motorReverse(MOTOR_RIGHT, 50);
    position.update();
    delay(10);
-   motorForward(MOTOR_LEFT, 55);
-   motorReverse(MOTOR_RIGHT, 55);
+   //motorForward(MOTOR_LEFT, 55);
+   //motorReverse(MOTOR_RIGHT, 55);
    currentAngle = position.getOrientation();
    Serial.println("Current angle");
    Serial.println(currentAngle);

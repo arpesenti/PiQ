@@ -11,12 +11,8 @@
 
 
 // TODO: adjust these 2 values in order to have the robot that goes straightforward at minimum speed
-#define MIN_SPEED_LEFT 50
+#define MIN_SPEED_LEFT 45
 #define MIN_SPEED_RIGHT 50
-
-
-// IF MIN_SPEED_LEFT < MIN_SPEED_RIGHT
-#define AVAILABLE_SPEED (100 - MIN_SPEED_RIGHT)
 
 class Motion {
 public:
@@ -27,8 +23,12 @@ public:
 	void stop();
 	void rotateLeft(int speed);
 	void rotateRight(int speed);
+	void setMinSpeed(int left, int right);
 	//void penguinWalking(Position &position);
-	
+private:
+	int minSpeedLeft;
+	int minSpeedRight;
+	int availableSpeed;
 };
 
 #endif

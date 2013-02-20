@@ -12,11 +12,11 @@ Position position;
 Motion motion;
 
 void setup(){
-  motion.init();
-  position.calibrate(motion, true);
-  position.init();
   Serial.begin(9600);
   Wire.begin();  
+  motion.init();
+  position.calibrate(motion, false);
+  position.init();
 }
 
 void loop(){
@@ -45,7 +45,7 @@ void loop(){
 void rotateToAngle(double toAngle){
   
   double tol = 0.1; // 5.7 degrees
-  motion.rotateRight(20); // 20% speed
+  motion.rotateRight(5); // 20% speed
   while(abs(position.getOrientation() - toAngle) > tol){
    position.update(); 
    Serial.println(position.getOrientation() * RAD_TO_DEG);
