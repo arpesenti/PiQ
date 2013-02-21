@@ -55,6 +55,7 @@ private:
   bool tryToRefindEgg();
   bool isOnBlackLine();
 	bool moveForwardKeepingDirection(double orientation);
+	bool areCloseAngles(double angle1, double angle2);
 
 };
 

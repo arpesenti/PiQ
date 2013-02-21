@@ -86,24 +86,28 @@ bool Robot::changePosition(){
 		return false; // not able to find a free direction - enter in panic state
 
 	motion.moveForward(speed);
-	while (distance < 50.0){
+	while (distance < 50.0 * MOUSE_SCALE){
 		if(isOnBlackLine()){
 			motion.stop();
 			position.update();
-			moveBackward(20);
+			moveBackward(10 * MOUSE_SCALE); // distance to do backward
 			position.update();
-			if(!rotateRight(PI/2)) {
+			if(!rotateRight(PI/2)) 
 				return false; // panic state	
-				motion.moveForward(speed);	
-			}
+			motion.moveForward(speed);	
+			
 		}
 		if(!canMoveForward()){
 			motion.stop();
 			position.update();
-			if(!rotateToFreeDirection()) 
-				return false; // panic state
+			delay(4000); // wait for passing robot
+			if(!canMoveForward()){
+				if(!rotateToFreeDirection()) 
+					return false; // panic state
+			}
 			motion.moveForward(speed);
 		}
+	
 		position.update();
 		distance = sqrt( square(position.getX()-startX) + square(position.getY()-startY));
 	}
@@ -196,12 +200,76 @@ bool Robot::reachEgg() {
 bool Robot::catchEgg() {
 
 }
+
+
 bool Robot::positioningTowardHome() {
+	double vectorPositionAngle = atan2(position.getY(), position.getX());
+	if (vectorPositionAngle < 0)
+		vectorPositionAngle += 2*PI;
+	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+	position.update();
+	double currentOrientation = position.getOrientation();
+	double deltaRad;
 
+	// always rotate right to reach the angleToFollow
+	if (angleToFollow > currentOrientation + TOLERANCE_ANGLE/2){
+		deltaRad = angleToFollow - currentOrientation; // positive value
+		rotateLeft(deltaRad);
+		return true;
+	}else if (angleToFollow < currentOrientation - TOLERANCE_ANGLE/2){
+		deltaRad = currentOrientation - angleToFollow; // positive value
+		rotateRight(deltaRad);
+		return true;
+	}else
+		return true;
+	
 }
+
 int Robot::tryToApproach() {
+// da considerare se incontro ostacoli...
+// per ora si aggiorna costantemente l'angolo...
 
+	int radius = 10 * MOUSE_SCALE;
+	position.update();
+	double distance = sqrt(square(position.getX()) + square(position.getY()));
+	
+	double currentOrientation = position.getOrientation();
+	double vectorPositionAngle = atan2(position.getY(), position.getX());
+	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+
+	if (angleToFollow < 0)
+		angleToFollow += 2*PI;
+
+	while(distance > radius){
+		if(!canMoveForward()){
+			motion.stop();
+			delay(4000);
+			if(canMoveForward())
+				continue;
+			
+			if(!changePosition())
+				return -1; //panic state
+			position.update();
+			distance = sqrt(square(position.getX()) + square(position.getY()));
+			vectorPositionAngle = atan2(position.getY(), position.getX());
+			angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+		}
+
+		moveForwardKeepingDirection(angleToFollow);
+		position.update();
+		distance = sqrt(square(position.getX()) + square(position.getY()));
+		vectorPositionAngle = atan2(position.getY(), position.getX());
+		angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+		
+	}
+			
+	motion.stop();
+	position.update();
+	return distance;
+	
 }
+
+
 bool Robot::searchLine() {
 
 }
@@ -222,13 +290,15 @@ bool Robot::escapeFromPanic() {
 void Robot::enterPanicState(){
 	// TODO : does not see here the global variable state
 
+	// turn on some led indicating it's in panic
 	//state = PANIC;
 }
 
 bool Robot::rotateToFreeDirection(){
-	double distance = 100;
-	int speed = 10;
+	double distance = 100; // distance of obstacles
+	int speed = CRUISE_SPEED;
 
+	// cycles eventually decreasing distance of obstacles
 	while( distance > 0){
 		unsigned long startTime = millis();
 		double startAngle = position.getOrientation();
@@ -242,7 +312,9 @@ bool Robot::rotateToFreeDirection(){
 						(position.getOrientation() < arriveAngleMod || position.getOrientation() > startAngle):
 						(position.getOrientation() < arriveAngleMod && position.getOrientation() > startAngle))){	
 			position.update();
+			
 			if (isOnBlackLine()){
+				motion.stop();
 				if(!switchRotation){
 					switchRotation = true;
 					startTime = millis();
@@ -251,6 +323,7 @@ bool Robot::rotateToFreeDirection(){
 					break;
 				}
 			}
+			
 			if ( millis() - startTime > TIME_OUT ){
 				if(switchRotation){	
 					motion.stop();		
@@ -271,7 +344,7 @@ bool Robot::rotateToFreeDirection(){
 			return true;
 		}
 		
-		distance -= 20;
+		distance -= 20; // repeat the cycle with a smaller distance of obstacles
 	}
 
 	enterPanicState();
@@ -280,20 +353,27 @@ bool Robot::rotateToFreeDirection(){
 }
 	
 bool Robot::isOnBlackLine(){
-	return lineSensor.color() == 'k';
+	//test
+	return false;
+	//return lineSensor.color() == 'k';
 }
 
 
-// rotate right -> + angleRad
+// rotate right : (+ angleRad)
 bool Robot::rotateRight(double angleRad){
-	
+// angleRad must be between 0 and 2*PI
+
 	Serial.println("enter rotate right");
+	position.update();
 	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
-	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
+
+	// toAngle must be between 0 and 2*PI
+	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
 	bool decelerated = false;
 	motion.rotateRight(ACCELERATION_SPEED);
-	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
+	
+	while (!areCloseAngles(position.getOrientation(),toAngle)){ 
 		position.update();
 		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
@@ -303,13 +383,14 @@ bool Robot::rotateRight(double angleRad){
 			//Serial.println("*****************");
 			decelerated = true;
 		}
+		position.update();
 		if ( millisFromStart  > TIME_OUT ){
 			motion.stop();		
 			enterPanicState();
 			return false;
 		}
-		//if (isOnBlackLine())
-		 //	return rotateLeft(angleRad);
+		if (isOnBlackLine())
+			return rotateLeft(angleRad);
 	}
 	motion.stop();
 	position.update();
@@ -319,22 +400,26 @@ bool Robot::rotateRight(double angleRad){
 	
 }
 
-// rotate left -> - angleRad
+// rotate left : (+ angleRad)
 bool Robot::rotateLeft(double angleRad){
+// angleRad must be between 0 and 2*PI
+
 	Serial.println("enter rotate left");
 	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
+	position.update();
 	double initialOrientation = position.getOrientation();
-	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
 	
+	// toAngle must be between 0 and 2*PI
+	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
 	Serial.print("initial orientation : ");
 	Serial.println(initialOrientation);
 	Serial.print("toAngle : ");
 	Serial.println(toAngle);
-
 	bool decelerated = false;
 	motion.rotateLeft(ACCELERATION_SPEED);
-	while (abs(position.getOrientation() - toAngle) > TOLERANCE_ANGLE){ 
+
+	while (!areCloseAngles(position.getOrientation(),toAngle)){ 
 		position.update();
 		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
@@ -344,13 +429,14 @@ bool Robot::rotateLeft(double angleRad){
 			//Serial.println("*****************");
 			decelerated = true;
 		}
+		position.update();
 		if ( millisFromStart > TIME_OUT ){
 			motion.stop();		
 			enterPanicState();
 			return false;
 		}
-		//if (isOnBlackLine())
-		//	return rotateRight(angleRad);
+		if (isOnBlackLine())
+			return rotateRight(angleRad);
 	}
 	motion.stop();
 	position.update();
@@ -368,7 +454,7 @@ bool Robot::moveBackward(double distanceToDo){
 	int startX = position.getX();
 	int startY = position.getY();
 	double distance = 0.0;
-	int speed = 20;
+	int speed = 20; // 20%
 	motion.moveBackward(speed);
 	while(distance < distanceToDo_mouse){
 		position.update();
@@ -380,7 +466,11 @@ bool Robot::moveBackward(double distanceToDo){
 	
 }
 
+
+// call it when angleToKeep is close enough to current orientation of robot
 bool Robot::moveForwardKeepingDirection(double angleToKeep){
+// angleToKeep must be between 0 and 2*PI
+
 	double currentAngle =  position.getOrientation() ;
 	
 	if ( currentAngle < PI/2 && angleToKeep > 3/2*PI)
@@ -424,4 +514,20 @@ bool Robot::tryToRefindEgg(){
 	return false;
 	
 	
+}
+
+
+// check if two angles in [0,2*PI] are closer than a TOLERANCE_ANGLE
+bool Robot::areCloseAngles(double angle1, double angle2){
+	if(abs(angle1 - angle2) < TOLERANCE_ANGLE)
+		return true;
+	
+	double angle1Negative = angle1 - 2*PI;
+	if(abs(angle1Negative - angle2) < TOLERANCE_ANGLE)
+		return true;
+
+	double angle2Negative = angle2 - 2*PI;
+	if(abs(angle1 - angle2Negative) < TOLERANCE_ANGLE)
+		return true;
+
 }
