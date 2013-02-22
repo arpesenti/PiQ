@@ -36,8 +36,9 @@ public:
 	bool deposit();
 	bool newInit();
 	bool escapeFromPanic();
-	// temporary
+	// temporary for test
 	bool rotateRight(double angleRad);
+	bool rotateLeft(double angleRad);
 private:
 	Position position;
 	Motion motion;
@@ -51,7 +52,7 @@ private:
   bool rotateToFreeDirection();
   bool moveBackward(double distanceToDo);
   bool canMoveForward();
-  bool rotateLeft(double angleRad);
+  
   bool tryToRefindEgg();
   bool isOnBlackLine();
 	bool moveForwardKeepingDirection(double orientation);

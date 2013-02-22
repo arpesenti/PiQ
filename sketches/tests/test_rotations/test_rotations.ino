@@ -1,19 +1,31 @@
+#include <Robot.h>
 #include <Position.h>
 #include <Motion.h>
-#include <Wire.h>
+#include <DistanceSensor.h>
+#include <LineSensor.h>
+#include <Feet.h>
+#include <Remote.h>
 #include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
+#include <Servo.h>
+#include <IRremote.h>
+#include <ADJDS311.h>
+#include <Wire.h>
 #include <AFMotor.h>
 #include <RobotMotor.h>
 #include <EEPROM.h>
 
+
 Position position;
 Motion motion;
+
+Robot robot;
 
 void setup(){
   Serial.begin(9600);
   Wire.begin();  
+	robot.init();
   motion.init();
   position.calibrate(motion, false);
   position.init();
@@ -21,7 +33,7 @@ void setup(){
 
 void loop(){
   
-  for ( int i = 1; i <= 6; i++){
+  for ( int i = 1; i <= 15; i++){
     double angle = position.getOrientation();
     double deltaAngle = PI/i;
     Serial.print("iteration: ");
@@ -30,13 +42,28 @@ void loop(){
     Serial.print(angle * RAD_TO_DEG);
     Serial.print("   ||    ");
     Serial.print("delta angle: ");
-    Serial.println(deltaAngle * RAD_TO_DEG);
+    Serial.print(deltaAngle * RAD_TO_DEG);
     double toAngle = angle + deltaAngle;
+		Serial.print("   ||    ");
+    Serial.print("arriving angle: ");
+    Serial.println(toAngle * RAD_TO_DEG);
     // in this case, angles are always positive
-    toAngle = fmod(toAngle, 2*PI);
-    if (toAngle < 0)
-     toAngle += 2*PI;
-    rotateToAngle(toAngle); 
+    toAngle = fmod(2*PI + toAngle, 2*PI);
+  	robot.rotateRight(deltaAngle);
+		delay(1000);
+		angle = position.getOrientation();
+		Serial.print("actual arriving angle: ");
+    Serial.println(angle * RAD_TO_DEG);
+		delay(2000);
+		Serial.println("rotate left of the same delta : ");		
+		robot.rotateLeft(deltaAngle);
+		delay(1000);
+		angle = position.getOrientation();
+		Serial.print("actual arriving angle: ");
+    Serial.println(angle * RAD_TO_DEG);
+		delay(2000);
+		
+    //rotateToAngle(toAngle); 
   
   }
   
