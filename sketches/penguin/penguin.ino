@@ -31,11 +31,7 @@
 #define DEPOSIT 10
 #define PANIC 11
 
-// Approach results
-// TODO move this constants in robot
-#define APPROACH_FOUND_LINE 1
-#define APPROACH_NOT_FOUND_LINE 2
-#define APPROACH_FAILED 3
+
 
 // Robot
 Robot robot;

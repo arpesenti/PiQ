@@ -14,11 +14,17 @@
 #define TOLERANCE_ANGLE 0.1
 #define DISTANCE_MARGIN 15
 #define ACCELERATION_TIME 50
+#define DRIFT_CONSTANT_MULTIPLIER 100
 
 
+// Approach results
+// TODO move this constants in robot
+#define APPROACH_FOUND_LINE 1
+#define APPROACH_NOT_FOUND_LINE 2
+#define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 30
-#define CRUISE_SPEED 15
+#define ACCELERATION_SPEED 35
+#define CRUISE_SPEED 20
 
 class Robot {
 public:
@@ -58,7 +64,7 @@ private:
   	bool isOnBlackLine();
 	bool moveForwardKeepingDirection(double speed, double orientation);
 	bool areCloseAngles(double angle1, double angle2, double tolerance);
-	double distanceBetweenAngles(double angle1, double angle2)
+	double distanceBetweenAngles(double angle1, double angle2);
 
 };
 

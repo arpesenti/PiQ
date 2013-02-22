@@ -27,10 +27,18 @@ void setup() {
         robot.start();
         delay(1000);
         Serial.println("init");
+        robot.rotateRight(3*PI/4);
+        delay(1000);
+        robot.changePosition();
+        delay(1000);
         robot.positioningTowardHome();
         Serial.print("Positioned");
         delay(1000);
-        robot.tryToApproach();
+        while ( robot.tryToApproach() == APPROACH_FAILED){
+          robot.positioningTowardHome();
+          delay(1000);
+          Serial.println("reposition");
+        }
         Serial.println("Arrived home hopefully");
 }
 
