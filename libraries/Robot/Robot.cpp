@@ -18,10 +18,10 @@ void Robot::init() {
 void Robot::start(){
 	position.init();
 	int speed = 25; // 25%
-	motion.moveForward(speed);
 	unsigned long startTime = millis();
-	while (abs(position.getY() / MOUSE_SCALE - 30) ){
+	while (abs(position.getY() / MOUSE_SCALE) < 80){
 		position.update();
+		moveForwardKeepingDirection(CRUISE_SPEED, PI/2);
 		if ( millis() - startTime > TIME_OUT){
 			enterPanicState();
 			break;
@@ -29,10 +29,10 @@ void Robot::start(){
 
 	}
 	motion.stop();
-	position.reset();
+	//position.reset(); // da rimettere!!!!
 	Serial.println(position.getX());
-  Serial.println(position.getY());
-  Serial.println(position.getOrientation());
+  	Serial.println(position.getY());
+  	Serial.println(position.getOrientation());
 }
 
 // scan rotating left
@@ -132,7 +132,7 @@ bool Robot::reachEgg() {
 	
 	if (newDistanceBottom > 30 && distanceProximity > 30){
 		while(newDistanceBottom < 30){
-			moveForwardKeepingDirection(initialOrientation);
+			moveForwardKeepingDirection(CRUISE_SPEED, initialOrientation);
 			position.update();
 			if(newDistanceBottom - oldDistanceBottom > 1){
 				motion.stop();
@@ -165,7 +165,7 @@ bool Robot::reachEgg() {
 	Serial.println(newProx);
 	
 	while(newProx > 5){
-		moveForwardKeepingDirection(initialOrientation);
+		moveForwardKeepingDirection(CRUISE_SPEED, initialOrientation);
 		position.update();
 
 
@@ -204,9 +204,17 @@ bool Robot::catchEgg() {
 
 bool Robot::positioningTowardHome() {
 	double vectorPositionAngle = atan2(position.getY(), position.getX());
+	Serial.print("X e Y: ");
+	Serial.println(position.getX());
+	Serial.println(position.getY());
+
 	if (vectorPositionAngle < 0)
 		vectorPositionAngle += 2*PI;
+	Serial.print("Vector: ");
+	Serial.println(vectorPositionAngle);
 	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+	Serial.print("Follow: ");
+	Serial.println(angleToFollow);
 	position.update();
 	double currentOrientation = position.getOrientation();
 	double deltaRad;
@@ -229,19 +237,19 @@ int Robot::tryToApproach() {
 // da considerare se incontro ostacoli...
 // per ora si aggiorna costantemente l'angolo...
 
-	int radius = 10 * MOUSE_SCALE;
+	int radius = 5 * MOUSE_SCALE;
 	position.update();
 	double distance = sqrt(square(position.getX()) + square(position.getY()));
-	
 	double currentOrientation = position.getOrientation();
 	double vectorPositionAngle = atan2(position.getY(), position.getX());
 	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
-
+	int speed = CRUISE_SPEED;
 	if (angleToFollow < 0)
 		angleToFollow += 2*PI;
 
 	while(distance > radius){
 		if(!canMoveForward()){
+			Serial.println("Can not move forward");
 			motion.stop();
 			delay(4000);
 			if(canMoveForward())
@@ -254,13 +262,32 @@ int Robot::tryToApproach() {
 			vectorPositionAngle = atan2(position.getY(), position.getX());
 			angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
 		}
-
-		moveForwardKeepingDirection(angleToFollow);
+		if (distance < 2*radius) 
+			speed = map(distance, 0, 10*MOUSE_SCALE, 0, CRUISE_SPEED);
+		moveForwardKeepingDirection(speed, angleToFollow);
 		position.update();
 		distance = sqrt(square(position.getX()) + square(position.getY()));
+		position.update();
 		vectorPositionAngle = atan2(position.getY(), position.getX());
+		position.update();
 		angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+		position.update();
 		
+		Serial.print("Distance, vector, angle to follow: ");
+		position.update();
+		Serial.println(distance);
+		position.update();
+		Serial.println(vectorPositionAngle);
+		position.update();
+		Serial.println(angleToFollow);
+		position.update();
+		Serial.print("Postion x and y");
+		position.update();
+		Serial.println(position.getX());
+		position.update();
+		Serial.println(position.getY());
+		position.update();
+
 	}
 			
 	motion.stop();
@@ -373,7 +400,7 @@ bool Robot::rotateRight(double angleRad){
 	bool decelerated = false;
 	motion.rotateRight(ACCELERATION_SPEED);
 	
-	while (!areCloseAngles(position.getOrientation(),toAngle)){ 
+	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
 		position.update();
 		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
@@ -412,20 +439,31 @@ bool Robot::rotateLeft(double angleRad){
 	
 	// toAngle must be between 0 and 2*PI
 	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
+	double distance = 
 	Serial.print("initial orientation : ");
 	Serial.println(initialOrientation);
 	Serial.print("toAngle : ");
 	Serial.println(toAngle);
 	bool decelerated = false;
+	int speed = CRUISE_SPEED;
 	motion.rotateLeft(ACCELERATION_SPEED);
 
-	while (!areCloseAngles(position.getOrientation(),toAngle)){ 
+	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
 		position.update();
 		Serial.println(position.getOrientation());
 		millisFromStart = millis() - startTime;
 		//Serial.println(millisFromStart);
+		if (areCloseAngles(position.getOrientation(),toAngle, 4*TOLERANCE_ANGLE)) {
+			speed = map(distanceBetweenAngles(position.getOrientation(), toAngle), 0, PI, 0, CRUISE_SPEED);
+			position.update();
+			if (! decelerated && millisFromStart > ACCELERATION_TIME) {
+				motion.rotateLeft(speed);
+				//Serial.println("*****************");
+				decelerated = true;
+			}
+		}
 		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
-			motion.rotateLeft(CRUISE_SPEED);
+			motion.rotateLeft(speed);
 			//Serial.println("*****************");
 			decelerated = true;
 		}
@@ -441,12 +479,13 @@ bool Robot::rotateLeft(double angleRad){
 	motion.stop();
 	position.update();
 	Serial.println("Arriving angle");
-  Serial.println(position.getOrientation());
+  	Serial.println(position.getOrientation());
 	return true;
 }
 
 bool Robot::canMoveForward() {
-	return highDistanceTop.distance() > 25;
+	//return highDistanceTop.distance() > 25;
+	return true;
 }
 
 bool Robot::moveBackward(double distanceToDo){
@@ -468,7 +507,7 @@ bool Robot::moveBackward(double distanceToDo){
 
 
 // call it when angleToKeep is close enough to current orientation of robot
-bool Robot::moveForwardKeepingDirection(double angleToKeep){
+bool Robot::moveForwardKeepingDirection(double speed, double angleToKeep){
 // angleToKeep must be between 0 and 2*PI
 
 	double currentAngle =  position.getOrientation() ;
@@ -478,15 +517,15 @@ bool Robot::moveForwardKeepingDirection(double angleToKeep){
 	else if ( angleToKeep < PI/2 && currentAngle > 3/2*PI)
 		currentAngle -= 2*PI;
 	double error = angleToKeep - currentAngle;
-	Serial.print("orientation: ");
-	Serial.println(currentAngle);
-	Serial.print("angleToKeep: ");
-	Serial.println(angleToKeep);
-	Serial.print("error: ");
-	Serial.println(error);
+	// Serial.print("orientation: ");
+	// Serial.println(currentAngle);
+	// Serial.print("angleToKeep: ");
+	// Serial.println(angleToKeep);
+	// Serial.print("error: ");
+	// Serial.println(error);
 	
 	position.update();
-	motion.moveForwardWithDrift(5, error * 50);	
+	motion.moveForwardWithDrift(speed, error * 50);	
 
 }
 
@@ -518,16 +557,33 @@ bool Robot::tryToRefindEgg(){
 
 
 // check if two angles in [0,2*PI] are closer than a TOLERANCE_ANGLE
-bool Robot::areCloseAngles(double angle1, double angle2){
-	if(abs(angle1 - angle2) < TOLERANCE_ANGLE)
+bool Robot::areCloseAngles(double angle1, double angle2, double tolerance){
+	if(abs(angle1 - angle2) < tolerance)
 		return true;
 	
 	double angle1Negative = angle1 - 2*PI;
-	if(abs(angle1Negative - angle2) < TOLERANCE_ANGLE)
+	if(abs(angle1Negative - angle2) < tolerance)
 		return true;
 
 	double angle2Negative = angle2 - 2*PI;
-	if(abs(angle1 - angle2Negative) < TOLERANCE_ANGLE)
+	if(abs(angle1 - angle2Negative) < tolerance)
 		return true;
+	return false;
+}
 
+double Robot::distanceBetweenAngles(double angle1, double angle2){
+	double deltaAngle;
+	if (angle1 > angle2)
+		deltaAngle = angle1 - angle2;
+	else
+		deltaAngle = angle2 - angle1;
+	if (deltaAngle > PI)
+		return 2*PI - deltaAngle;
+	else
+		return deltaAngle;
+}
+
+void Robot::recalibrate() {
+	position.calibrate(motion, true);
+	//TODO calibrate color
 }

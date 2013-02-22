@@ -42,10 +42,15 @@ void Position::update() {
 	mouse.read(); // mstat
 	char dx = mouse.read();
 	char dy = mouse.read();
-	double alpha = (relativeAngle + northAngle) - PI/2;
-	x = x + cos(alpha)*dx - sin(alpha)*dy;
-	y = y + sin(alpha)*dx + cos(alpha)*dy;
+	// Serial.print("dx e dy   ");
+	// Serial.print((int)dx);
+	// Serial.print("    ");
+	// Serial.print((int)dy);
+	// Serial.print("    ");
 	relativeAngle = updateAngle();
+	double alpha = relativeAngle + northAngle;
+	x = x + cos(alpha)*dy + sin(alpha)*dx;
+	y = y + sin(alpha)*dy - cos(alpha)*dx;
 }
 
 void Position::reset() {

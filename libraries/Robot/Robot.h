@@ -17,8 +17,8 @@
 
 
 
-#define ACCELERATION_SPEED 20
-#define CRUISE_SPEED 10
+#define ACCELERATION_SPEED 30
+#define CRUISE_SPEED 15
 
 class Robot {
 public:
@@ -39,6 +39,7 @@ public:
 	// temporary for test
 	bool rotateRight(double angleRad);
 	bool rotateLeft(double angleRad);
+	void recalibrate();
 private:
 	Position position;
 	Motion motion;
@@ -49,14 +50,15 @@ private:
 	Feet feet;
 	Remote remote;
 	void enterPanicState();
-  bool rotateToFreeDirection();
-  bool moveBackward(double distanceToDo);
-  bool canMoveForward();
+  	bool rotateToFreeDirection();
+ 	bool moveBackward(double distanceToDo);
+  	bool canMoveForward();
   
-  bool tryToRefindEgg();
-  bool isOnBlackLine();
-	bool moveForwardKeepingDirection(double orientation);
-	bool areCloseAngles(double angle1, double angle2);
+  	bool tryToRefindEgg();
+  	bool isOnBlackLine();
+	bool moveForwardKeepingDirection(double speed, double orientation);
+	bool areCloseAngles(double angle1, double angle2, double tolerance);
+	double distanceBetweenAngles(double angle1, double angle2)
 
 };
 
