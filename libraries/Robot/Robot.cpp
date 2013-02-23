@@ -1,5 +1,8 @@
 #include "Robot.h"
 
+extern int state;
+
+
 Robot::Robot() {
 
 }
@@ -326,15 +329,43 @@ bool Robot::newInit() {
 
 }
 bool Robot::escapeFromPanic() {
-	
+	while (state == PANIC) {
+		remote.update();
+		char command = remote.strategy();
+		if (command == NORMAL_STRATEGY) {
+			motion.stop();
+			state = EXPLORE_SCAN;
+		} else if (command == REMOTE_ROTATELEFT) {
+			motion.stop();
+			rotateLeft(TOLERANCE_ANGLE);
+		} else if (command == REMOTE_ROTATERIGHT) {
+			motion.stop();
+			rotateRight(TOLERANCE_ANGLE);
+		} else if (command == REMOTE_MOVEFORWARD) {
+			motion.stop();
+			motion.moveForward(CRUISE_SPEED);
+		} else if (command == REMOTE_MOVEBACKWARD) {
+			motion.stop();
+			motion.moveBackward(CRUISE_SPEED);
+		} else if (command == REMOTE_STOP) {
+			motion.stop();
+		}
+	}
 }
 
+char Robot::readStrategy() {
+	remote.update();
+	char strategy = remote.strategy();
+	if (strategy == PANIC) {
+		return PANIC;
+	} else {
+		return NORMAL_STRATEGY;
+	}
+}
 
 void Robot::enterPanicState(){
-	// TODO : does not see here the global variable state
-
 	// turn on some led indicating it's in panic
-	//state = PANIC;
+	state = PANIC;
 }
 
 bool Robot::rotateToFreeDirection(){

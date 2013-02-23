@@ -16,23 +16,6 @@
 #include <RobotMotor.h>
 #include <EEPROM.h>
 
-// States
-#define WAIT 0
-#define EXPLORE 1
-#define EXPLORE_SCAN 2
-#define EXPLORE_CHANGE_POSITION 21
-#define EXPLORE_REACHEGG 3
-#define CATCH 4
-#define COMEBACK 5
-#define COMEBACK_POSITIONING 6
-#define COMEBACK_APPROACHING 7
-#define COMEBACK_LINEFOLLOWING 8
-#define COMEBACK_LINESEARCHING 9
-#define DEPOSIT 10
-#define PANIC 11
-
-
-
 // Robot
 Robot robot;
 int state;
@@ -119,6 +102,7 @@ void loop() {
       
     case PANIC:
       Serial.println("Entered panic state");
+      robot.escapeFromPanic();
       break;
   } 
 }

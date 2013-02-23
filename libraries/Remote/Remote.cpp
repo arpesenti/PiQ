@@ -18,9 +18,23 @@ void Remote::update() {
 			currentStrategy = WAIT_STRATEGY;
 		} else if (value == PANIC_STRATEGY_BUTTON) {
 			currentStrategy = PANIC_STRATEGY;
+		} else if (value == REMOTE_ROTATELEFT_BUTTON) {
+			currentStrategy = REMOTE_ROTATELEFT;
+		} else if (value == REMOTE_ROTATERIGHT_BUTTON) {
+			currentStrategy = REMOTE_ROTATERIGHT;
+		} else if (value == REMOTE_MOVEFORWARD_BUTTON) {
+			currentStrategy = REMOTE_MOVEFORWARD;
+		} else if (value == REMOTE_MOVEBACKWARD_BUTTON) {
+			currentStrategy = REMOTE_MOVEBACKWARD;
+		} else if (value == REMOTE_STOP_BUTTON) {
+			currentStrategy = REMOTE_STOP;
+		} else if (value == REMOTE_OPENFEET_BUTTON) {
+			currentStrategy = REMOTE_OPENFEET_BUTTON;
+		} else if (value == REMOTE_CLOSEFEET_BUTTON) {
+			currentStrategy = REMOTE_CLOSEFEET;
 		}
 
-    receiver.resume();
+    	receiver.resume();
 	} 
 }
 

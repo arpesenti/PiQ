@@ -9,6 +9,22 @@
 #include <Feet.h>
 #include <Remote.h>
 
+// States
+#define WAIT 0
+#define EXPLORE 1
+#define EXPLORE_SCAN 2
+#define EXPLORE_CHANGE_POSITION 21
+#define EXPLORE_REACHEGG 3
+#define CATCH 4
+#define COMEBACK 5
+#define COMEBACK_POSITIONING 6
+#define COMEBACK_APPROACHING 7
+#define COMEBACK_LINEFOLLOWING 8
+#define COMEBACK_LINESEARCHING 9
+#define DEPOSIT 10
+#define PANIC 11
+
+
 #define MOUSE_SCALE 85
 #define TIME_OUT 30000
 #define TOLERANCE_ANGLE 0.1
@@ -65,6 +81,7 @@ private:
 	bool moveForwardKeepingDirection(double speed, double orientation);
 	bool areCloseAngles(double angle1, double angle2, double tolerance);
 	double distanceBetweenAngles(double angle1, double angle2);
+	char readStrategy();
 
 };
 
