@@ -328,7 +328,47 @@ int Robot::tryToApproach() {
 
 
 bool Robot::searchLine() {
+	// PRECONDITION: robot nearby the home
 
+	// rotate toward home, PI
+	double currentOrientation = position.getOrientation();
+	double angleToFollow = PI;
+	double deltaRad = 0;
+	if (angleToFollow > currentOrientation + TOLERANCE_ANGLE/2){
+		deltaRad = angleToFollow - currentOrientation; // positive value
+		rotateLeft(deltaRad);
+	} else if (angleToFollow < currentOrientation - TOLERANCE_ANGLE/2){
+		deltaRad = currentOrientation - angleToFollow; // positive value
+		rotateRight(deltaRad);
+	}
+
+	// search line in a zig zag way
+	unsigned long startTime = millis();
+	while (!isOnBlueLine && millis()-startTime < TIME_OUT) {
+		position.update();
+		int x = position.getX();
+		int y = position.getY();
+		while (canMoveForward && !isOnBlackLine && distance < 30 && millis()-startTime < TIME_OUT) {
+			position.update();
+			motion.moveForward(CRUISE_SPEED);
+			distance = sqrt(square(x - position.getX()) + square(y - position.getY()));
+			position.update();
+		}
+		motion.stop();
+		position.update();
+		rotateLeft(PI); // dietrofront 
+		if (isOnBlueLine) {
+			motion.stop()
+			position.update();
+			return true;
+		}
+		if (millis()-startTime > TIME_OUT) {
+			motion.stop()
+			position.update();
+			return false;
+		}
+	}
+	return false;
 }
 
 bool Robot::followLineToHome() {
@@ -660,4 +700,8 @@ double Robot::distanceBetweenAngles(double angle1, double angle2){
 void Robot::recalibrate() {
 	position.calibrate(motion, true);
 	//TODO calibrate color
+}
+
+bool Robot::isOnBlueLine() {
+	return lineSensor.color() == 'b';
 }
