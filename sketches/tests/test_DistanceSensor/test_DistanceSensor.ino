@@ -1,7 +1,6 @@
 #include <DistanceSensor.h>
 #include <Pins.h>
 
-
 DistanceSensor prox;
 DistanceSensor highTop;
 DistanceSensor highBottom;
@@ -15,8 +14,12 @@ void setup(){
 }
 
 void loop(){
+  Serial.println("");
+  Serial.print("Proximity  ");
   Serial.println(prox.distance());
-  //Serial.println(highTop.distance());
-  //Serial.println(highBottom.distance());
-  delay(200);
+  Serial.print("Top        ");
+  Serial.println(highTop.distance());
+  Serial.print("Bottom     ");
+  Serial.println(highBottom.distance());
+  delay(500);
 }
