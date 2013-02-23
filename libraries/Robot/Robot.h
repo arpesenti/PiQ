@@ -82,6 +82,7 @@ private:
 	bool areCloseAngles(double angle1, double angle2, double tolerance);
 	double distanceBetweenAngles(double angle1, double angle2);
 	char readStrategy();
+	bool isOnBlueLine();
 
 };
 

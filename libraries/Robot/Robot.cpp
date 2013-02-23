@@ -344,11 +344,12 @@ bool Robot::searchLine() {
 
 	// search line in a zig zag way
 	unsigned long startTime = millis();
-	while (!isOnBlueLine && millis()-startTime < TIME_OUT) {
+	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
 		int x = position.getX();
 		int y = position.getY();
-		while (canMoveForward && !isOnBlackLine && distance < 30 && millis()-startTime < TIME_OUT) {
+		double distance = 0;
+		while (canMoveForward() && !isOnBlackLine() && distance < 30*MOUSE_SCALE && millis()-startTime < TIME_OUT) {
 			position.update();
 			motion.moveForward(CRUISE_SPEED);
 			distance = sqrt(square(x - position.getX()) + square(y - position.getY()));
@@ -357,13 +358,13 @@ bool Robot::searchLine() {
 		motion.stop();
 		position.update();
 		rotateLeft(PI); // dietrofront 
-		if (isOnBlueLine) {
-			motion.stop()
+		if (isOnBlueLine()) {
+			motion.stop();
 			position.update();
 			return true;
 		}
 		if (millis()-startTime > TIME_OUT) {
-			motion.stop()
+			motion.stop();
 			position.update();
 			return false;
 		}
@@ -372,7 +373,25 @@ bool Robot::searchLine() {
 }
 
 bool Robot::followLineToHome() {
+	// PRECONDITION: is on blue line, and there is no obstacle in front other then the home...
 
+	if (!isOnBlueLine()) {
+		return false;
+	}
+	int drift = 0;
+	double alpha = 0.2; // constant to calibrate the amount of drift
+	unsigned long startTime = millis();
+	while (isOnBlueLine() && highDistanceTop.distance() > 30 && millis()-startTime < TIME_OUT ) {
+		drift = lineSensor.rightReflectance() - lineSensor.leftReflectance();
+		motion.moveForwardWithDrift(CRUISE_SPEED, alpha*drift);
+		position.update();
+		if (!isOnBlueLine() || millis()-startTime > TIME_OUT) {
+			motion.stop();
+			position.update();
+			return false;
+		}
+	}
+	return true;
 }
 
 bool Robot::deposit() {
