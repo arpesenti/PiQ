@@ -208,7 +208,18 @@ bool Robot::reachEgg() {
 	
 }
 bool Robot::catchEgg() {
-
+	// PRECONDITION robot near the egg
+	double eggDistance = proximity.distance();
+	if (eggDistance > 8)
+		return false; //egg too far
+	feet.close(50);
+	eggDistance = proximity.distance();
+	if (eggDistance > 4) 
+		return true; //egg on board
+	else {
+		feet.open(); //egg missed
+		return false;
+	}
 }
 
 
@@ -319,15 +330,19 @@ int Robot::tryToApproach() {
 bool Robot::searchLine() {
 
 }
+
 bool Robot::followLineToHome() {
 
 }
+
 bool Robot::deposit() {
 
 }
+
 bool Robot::newInit() {
 
 }
+
 bool Robot::escapeFromPanic() {
 	while (state == PANIC) {
 		remote.update();
