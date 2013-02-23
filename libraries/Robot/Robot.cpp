@@ -395,11 +395,21 @@ bool Robot::followLineToHome() {
 }
 
 bool Robot::deposit() {
+	// PRECONDITION: has the home in front
 
+	feet.open();
+	int bumpDuration = 100;
+	motion.moveForward(CRUISE_SPEED);
+	delay(bumpDuration); // small bump to the just released egg
+	motion.stop();
+	motion.moveBackward(CRUISE_SPEED);
+	delay(bumpDuration);
+	motion.stop();
+	return true; // could it fail?
 }
 
 bool Robot::newInit() {
-
+	
 }
 
 bool Robot::escapeFromPanic() {
