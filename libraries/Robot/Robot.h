@@ -83,6 +83,7 @@ private:
 	double distanceBetweenAngles(double angle1, double angle2);
 	char readStrategy();
 	bool isOnBlueLine();
+	void rotateToAngle(double angle);
 
 };
 

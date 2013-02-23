@@ -331,16 +331,7 @@ bool Robot::searchLine() {
 	// PRECONDITION: robot nearby the home
 
 	// rotate toward home, PI
-	double currentOrientation = position.getOrientation();
-	double angleToFollow = PI;
-	double deltaRad = 0;
-	if (angleToFollow > currentOrientation + TOLERANCE_ANGLE/2){
-		deltaRad = angleToFollow - currentOrientation; // positive value
-		rotateLeft(deltaRad);
-	} else if (angleToFollow < currentOrientation - TOLERANCE_ANGLE/2){
-		deltaRad = currentOrientation - angleToFollow; // positive value
-		rotateRight(deltaRad);
-	}
+	rotateToAngle(PI);
 
 	// search line in a zig zag way
 	unsigned long startTime = millis();
@@ -409,7 +400,12 @@ bool Robot::deposit() {
 }
 
 bool Robot::newInit() {
-	
+	// PRECONDITION: egg released, facing the home
+
+	moveBackward(30);
+	rotateToAngle(PI/2);
+	position.reset();
+	return false; // could it fail?
 }
 
 bool Robot::escapeFromPanic() {
@@ -733,4 +729,17 @@ void Robot::recalibrate() {
 
 bool Robot::isOnBlueLine() {
 	return lineSensor.color() == 'b';
+}
+
+void Robot::rotateToAngle(double angle) {
+	double currentOrientation = position.getOrientation();
+	double angleToFollow = angle;
+	double deltaRad = 0;
+	if (angleToFollow > currentOrientation + TOLERANCE_ANGLE/2){
+		deltaRad = angleToFollow - currentOrientation; // positive value
+		rotateLeft(deltaRad);
+	} else if (angleToFollow < currentOrientation - TOLERANCE_ANGLE/2){
+		deltaRad = currentOrientation - angleToFollow; // positive value
+		rotateRight(deltaRad);
+	}
 }
