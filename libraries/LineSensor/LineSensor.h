@@ -15,7 +15,7 @@
 #define C_HIGH_THRESHOLD 600
 
 #define WINDOW_WIDTH 5
-#define ALPHA_FILTER 0.4
+#define ALPHA_FILTER 0.6
 
 class LineSensor {
 public:
@@ -29,10 +29,16 @@ private:
 	ADJDS311 colorSensor;
 	int level(int component_intensity);
 	int window[WINDOW_WIDTH];
-	int previousValue;
+	int previousValueLeft;
+	int previousValueRight;
+	int previousValueCenter;
 	int windowColorR[WINDOW_WIDTH];
 	int windowColorG[WINDOW_WIDTH];
 	int windowColorB[WINDOW_WIDTH];
+	int previousValueColorR;
+	int previousValueColorG;
+	int previousValueColorB;
+
 
 	int median(int x[]);
 	int exponentialFilter(int value, int previous);
