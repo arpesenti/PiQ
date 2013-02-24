@@ -32,6 +32,10 @@ void Remote::update() {
 			currentStrategy = REMOTE_OPENFEET_BUTTON;
 		} else if (value == REMOTE_CLOSEFEET_BUTTON) {
 			currentStrategy = REMOTE_CLOSEFEET;
+		} else if (value == REMOTE_INCREASE_SPEED_BUTTON) {
+			currentStrategy = REMOTE_INCREASE_SPEED;
+		} else if (value == REMOTE_DECREASE_SPEED_BUTTON) {
+			currentStrategy = REMOTE_DECREASE_SPEED;
 		}
 
     	receiver.resume();
@@ -39,5 +43,7 @@ void Remote::update() {
 }
 
 char Remote::strategy() {
-	return currentStrategy;
+	char strategy = currentStrategy;
+	currentStrategy = REMOTE_NO_STRATEGY; // when read clear the current strategy
+	return strategy;
 }
