@@ -17,13 +17,14 @@
 #include <EEPROM.h>
 
 Robot robot;
+int state;
 
 void setup() {
         Serial.begin(9600);
         Wire.begin();
 	robot.init();
         //robot.recalibrate();
-        //delay(3000);
+        delay(3000);
         robot.start();
         delay(1000);
         Serial.println("init");

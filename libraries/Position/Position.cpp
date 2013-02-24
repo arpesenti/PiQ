@@ -15,11 +15,11 @@ bool Position::init() {
 	mouseInit();
 	readCal(); // TODO: check if calibration is already in EEPROM. If not initialize xMax,.. to 0
 	relativeAngle = updateAngle();
-	northAngle = fmod(2*PI + PI/2 - relativeAngle, 2*PI);
-  	Serial.println(northAngle);
-  	Serial.println(relativeAngle);
+	northAngle = fmod(PI_TIMES_2 + PI/2 - relativeAngle, PI_TIMES_2);
+  //	Serial.println(northAngle);
+  //	Serial.println(relativeAngle);
 	Serial.println("end of initialization of Position"); 
-	Serial.println("");
+	//Serial.println("");
 	return true;
 }
 
@@ -33,9 +33,12 @@ int Position::getY() {
 }
 
 double Position::getOrientation() {
-	return fmod(2*PI + northAngle + relativeAngle, 2*PI);
+	//return fmod(2*PI + northAngle + relativeAngle, 2*PI);
+	updateAngle();
+	return alpha;
 }
 
+// just update coordinates
 void Position::update() {
 	mouse.write(0xeb); // ask data
 	mouse.read(); // ignore acknowledgement 
@@ -47,8 +50,7 @@ void Position::update() {
 	// Serial.print("    ");
 	// Serial.print((int)dy);
 	// Serial.print("    ");
-	relativeAngle = updateAngle();
-	double alpha = relativeAngle + northAngle;
+	
 	x = x + cos(alpha)*dy + sin(alpha)*dx;
 	y = y + sin(alpha)*dy - cos(alpha)*dx;
 }
@@ -67,16 +69,31 @@ void Position::reset() {
 	y = 0;
 }
 
+// just clear readings. It must be call after a rotation of the robot
+void Position::clearMouseBuffer(){
+	mouse.write(0xeb); // ask data
+	mouse.read(); // ignore acknowledgement 
+	mouse.read(); // mstat
+	char dx = mouse.read();
+	char dy = mouse.read();
+}
+
+
+// update the current orientation alpha a
 float Position::updateAngle() {
 	MagnetometerScaled scaled = compass.ReadScaledAxis();
 	//compensate for compass location, using stored calibration data
-  	scaled.XAxis = (xScaleFactor * scaled.XAxis) + compassXOffset;
-  	scaled.YAxis = (yScaleFactor * scaled.YAxis) + compassYOffset;
-  
-   	// Calculate heading when the magnetometer is level, then correct for signs of axis.
-  	float heading = atan2(scaled.YAxis, scaled.XAxis);
+	scaled.XAxis = (xScaleFactor * scaled.XAxis) + compassXOffset;
+	scaled.YAxis = (yScaleFactor * scaled.YAxis) + compassYOffset;
 
-	if (heading < 0) heading += 2 * PI;
+ 	// Calculate heading when the magnetometer is level, then correct for signs of axis.
+	float heading = atan2(scaled.YAxis, scaled.XAxis);
+		
+	if (heading < 0) 
+		heading += 2 * PI;
+
+	relativeAngle = heading;
+	alpha = fmod(PI_TIMES_2 + northAngle + relativeAngle, PI_TIMES_2);
 	return heading;
 }
 

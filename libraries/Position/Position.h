@@ -12,6 +12,8 @@
 #define COMPASS_DECLINATION 0.03199
 #define NUMBER_OF_SAMPLES 180
 
+#define PI_TIMES_2 6.28
+
 class Position {
 public:
 	Position();
@@ -21,6 +23,7 @@ public:
 	double getRawOrientation();
 	void reset();
 	void update();
+	void clearMouseBuffer();
 	bool init();
 	void calibrate(Motion &motion, bool newCalibration);
 private:
@@ -34,6 +37,7 @@ private:
 	int y;
 	double relativeAngle;
 	double northAngle;
+	double alpha;
 	int xScaleFactor;
 	int yScaleFactor;
 	int compassXOffset;

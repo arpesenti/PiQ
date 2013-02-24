@@ -33,14 +33,21 @@
 #define DRIFT_CONSTANT_MULTIPLIER 100
 
 
+
+
 // Approach results
 // TODO move this constants in robot
 #define APPROACH_FOUND_LINE 1
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 35
+#define ACCELERATION_SPEED 20
 #define CRUISE_SPEED 20
+#define ROTATIONAL_CRUISE_SPEED 10
+
+#define DISTANCE_FOR_ADJUSTING_ANGLE 5
+#define DECELERATING_DISTANCE 11
+
 
 class Robot {
 public:
@@ -71,6 +78,7 @@ private:
 	LineSensor lineSensor;
 	Feet feet;
 	Remote remote;
+	bool adjustOrientation(double angleToFollow);
 	void enterPanicState();
   	bool rotateToFreeDirection();
  	bool moveBackward(double distanceToDo);
