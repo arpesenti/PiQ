@@ -547,7 +547,7 @@ bool Robot::newInit() {
 	moveBackward(30);
 	rotateToAngle(PI/2);
 	position.reset();
-	return false; // could it fail? *************************************************************** why false??????
+	return true; // could it fail?
 }
 
 bool Robot::escapeFromPanic() {
