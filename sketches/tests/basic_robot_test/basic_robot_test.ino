@@ -32,6 +32,10 @@ void setup() {
         delay(1000);
         robot.changePosition();
         delay(1000);
+        robot.rotateLeft(3*PI/4);
+        delay(1000);
+        robot.changePosition();
+        delay(1000);
         robot.positioningTowardHome();
         Serial.print("Positioned");
         delay(1000);

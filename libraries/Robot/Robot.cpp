@@ -53,7 +53,8 @@ void Robot::start(){
 		if ( distance > NewDistanceLimit){
 			motion.stop();
 			position.update();
-			adjustOrientation(angleToFollow); // follow initial angle;
+			adjustOrientation(angleToFollow); // follow initial angle
+			position.getOrientation(); // update actual angle to compute exact coordinates
 			position.update();
 			NewDistanceLimit = NewDistanceLimit + DISTANCE_FOR_ADJUSTING_ANGLE;
 			position.update();
@@ -372,7 +373,7 @@ int Robot::tryToApproach() {
 // da considerare se incontro ostacoli...
 // per ora si aggiorna costantemente l'angolo...
 
-	int radius = 5;
+	int radius = 2;
 	double deltaX = 0;
 	double deltaY = 0;
 	
