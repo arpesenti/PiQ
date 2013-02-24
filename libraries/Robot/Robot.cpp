@@ -1,7 +1,7 @@
 #include "Robot.h"
 
 extern int state;
-
+extern int cruiseSpeed;
 
 Robot::Robot() {
 
@@ -16,6 +16,7 @@ void Robot::init() {
 	//feet.init();
 	//remote.init();
 	position.calibrate(motion, false);
+	cruiseSpeed = CRUISE_SPEED;
 }
 
 void Robot::start(){
@@ -884,5 +885,18 @@ void Robot::rotateToAngle(double angle) {
 	} else if (angleToFollow < currentOrientation - TOLERANCE_ANGLE/2){
 		deltaRad = currentOrientation - angleToFollow; // positive value
 		rotateRight(deltaRad);
+	}
+}
+
+void Robot::checkSpeedChange() {
+	remote.update();
+	char strategy = remote.strategy();
+	int step = 5;
+	if (strategy == REMOTE_INCREASE_SPEED) {
+		if (cruiseSpeed + 5 <= 100)
+			cruiseSpeed += 5; 
+	} else if (strategy == REMOTE_DECREASE_SPEED) {
+		if (cruiseSpeed - 5 > 0)
+			cruiseSpeed -= 5;
 	}
 }

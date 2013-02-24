@@ -92,6 +92,7 @@ private:
 	char readStrategy();
 	bool isOnBlueLine();
 	void rotateToAngle(double angle);
+	void checkSpeedChange();
 
 };
 
