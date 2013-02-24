@@ -11,6 +11,15 @@ void LineSensor::init(){
 	Serial.println("");
 	Serial.println("end of calibration of Color sensor"); 
 	Serial.println("");
+
+	//filter initialization
+	previousValue = 0;
+	for (int i = 0; i < WINDOW_WIDTH) {
+		window[i] = 0;
+		windowColorR[i] = 0;
+		windowColorG[i] = 0;
+		windowColorB[i] = 0;
+	}
 }
 
 char LineSensor::color() {
@@ -46,11 +55,19 @@ char LineSensor::color() {
 }
 
 int LineSensor::leftReflectance() {
-	return analogRead(LEFT_REFLECTANCE_PIN);
+	for (int i = 0; i< WINDOW_WIDTH; i++) {
+		window[i] = analogRead(LEFT_REFLECTANCE_PIN);
+	}
+	previousValue = exponentialFilter(median(window));
+	return previousValue;
 }
 
 int LineSensor::rightReflectance() {
-	return analogRead(RIGHT_REFLECTANCE_PIN);
+	for (int i = 0; i< WINDOW_WIDTH; i++) {
+		window[i] = analogRead(RIGHT_REFLECTANCE_PIN);
+	}
+	previousValue = exponentialFilter(median(window));
+	return previousValue;
 }
 
 //  Lower value is an indication of greater reflection
@@ -66,3 +83,33 @@ int LineSensor::level(int component_intensity){
 		return C_HIGH;
 	return C_MEDIUM;
 }
+
+int LineSensor::median(int x[]) {
+    int temp;
+    int i, j;
+    // the following two loops sort the array x in ascending order
+    for(i=0; i<HISTORY_WIDTH-1; i++) {
+        for(j=i+1; j<HISTORY_WIDTH; j++) {
+            if(x[j] < x[i]) {
+                // swap elements
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
+            }
+        }
+    }
+ 
+    if(HISTORY_WIDTH%2==0) {
+        // if there is an even number of elements, return mean of the two elements in the middle
+        return((x[HISTORY_WIDTH/2] + x[HISTORY_WIDTH/2 - 1]) / 2.0);
+    } else {
+        // else return the element in the middle
+        return x[HISTORY_WIDTH/2];
+    }
+}
+
+int LineSensor::exponentialFilter(int value, int previous) {
+	double x = ALPHA_FILTER * value + (1 - ALPHA_FILTER) * previous;
+	return (int)x;
+}
+
