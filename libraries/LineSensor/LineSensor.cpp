@@ -13,7 +13,11 @@ void LineSensor::init(){
 	Serial.println("");
 
 	//filter initialization
-	previousValue = 0;
+	previousValueLeft = 0;
+	previousValueRight = 0;
+	previousValueColorR = 0;
+	previousValueColorG = 0;
+	previousValueColorB = 0;
 	for (int i = 0; i < WINDOW_WIDTH; i++) {
 		window[i] = 0;
 		windowColorR[i] = 0;
@@ -23,10 +27,24 @@ void LineSensor::init(){
 }
 
 char LineSensor::color() {
-	RGBC color = colorSensor.read();
-	int Rlevel = level(color.red);
-	int Glevel = level(color.green);
-	int Blevel = level(color.blue);
+	for (int i = 0; i< WINDOW_WIDTH; i++) {
+		RGBC color = colorSensor.read();
+		windowColorR[i] = color.red;
+		windowColorG[i] = color.green;
+		windowColorB[i] = color.blue;
+	}
+
+	int redValue = exponentialFilter(median(windowColorR), previousValueColorR);
+	int greenValue = exponentialFilter(median(windowColorG), previousValueColorG);
+	int blueValue = exponentialFilter(median(windowColorB), previousValueColorB);
+
+	previousValueColorR = redValue;
+	previousValueColorG = greenValue;
+	previousValueColorB = blueValue;
+
+	int Rlevel = level(redValue);
+	int Glevel = level(greenValue);
+	int Blevel = level(blueValue);
 
 	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
 		return 'w';
@@ -58,22 +76,26 @@ int LineSensor::leftReflectance() {
 	for (int i = 0; i< WINDOW_WIDTH; i++) {
 		window[i] = analogRead(LEFT_REFLECTANCE_PIN);
 	}
-	previousValue = exponentialFilter(median(window), previousValue);
-	return previousValue;
+	previousValueLeft = exponentialFilter(median(window), previousValueLeft);
+	return previousValueLeft;
 }
 
 int LineSensor::rightReflectance() {
 	for (int i = 0; i< WINDOW_WIDTH; i++) {
 		window[i] = analogRead(RIGHT_REFLECTANCE_PIN);
 	}
-	previousValue = exponentialFilter(median(window), previousValue);
-	return previousValue;
+	previousValueRight = exponentialFilter(median(window), previousValueRight);
+	return previousValueRight;
 }
 
 //  Lower value is an indication of greater reflection
 int LineSensor::centerReflectance() {
-	RGBC color = colorSensor.read();
-	return (1023 - color.clear);
+	for (int i = 0; i< WINDOW_WIDTH; i++) {
+		RGBC color = colorSensor.read();
+		window[i] = (1023 - color.clear);
+	}
+	previousValueCenter = exponentialFilter(median(window), previousValueCenter);
+	return previousValueCenter;
 }
 
 int LineSensor::level(int component_intensity){
