@@ -14,7 +14,7 @@ void LineSensor::init(){
 
 	//filter initialization
 	previousValue = 0;
-	for (int i = 0; i < WINDOW_WIDTH) {
+	for (int i = 0; i < WINDOW_WIDTH; i++) {
 		window[i] = 0;
 		windowColorR[i] = 0;
 		windowColorG[i] = 0;
@@ -58,7 +58,7 @@ int LineSensor::leftReflectance() {
 	for (int i = 0; i< WINDOW_WIDTH; i++) {
 		window[i] = analogRead(LEFT_REFLECTANCE_PIN);
 	}
-	previousValue = exponentialFilter(median(window));
+	previousValue = exponentialFilter(median(window), previousValue);
 	return previousValue;
 }
 
@@ -66,7 +66,7 @@ int LineSensor::rightReflectance() {
 	for (int i = 0; i< WINDOW_WIDTH; i++) {
 		window[i] = analogRead(RIGHT_REFLECTANCE_PIN);
 	}
-	previousValue = exponentialFilter(median(window));
+	previousValue = exponentialFilter(median(window), previousValue);
 	return previousValue;
 }
 
@@ -88,8 +88,8 @@ int LineSensor::median(int x[]) {
     int temp;
     int i, j;
     // the following two loops sort the array x in ascending order
-    for(i=0; i<HISTORY_WIDTH-1; i++) {
-        for(j=i+1; j<HISTORY_WIDTH; j++) {
+    for(i=0; i<WINDOW_WIDTH-1; i++) {
+        for(j=i+1; j<WINDOW_WIDTH; j++) {
             if(x[j] < x[i]) {
                 // swap elements
                 temp = x[i];
@@ -99,12 +99,12 @@ int LineSensor::median(int x[]) {
         }
     }
  
-    if(HISTORY_WIDTH%2==0) {
+    if(WINDOW_WIDTH%2==0) {
         // if there is an even number of elements, return mean of the two elements in the middle
-        return((x[HISTORY_WIDTH/2] + x[HISTORY_WIDTH/2 - 1]) / 2.0);
+        return((x[WINDOW_WIDTH/2] + x[WINDOW_WIDTH/2 - 1]) / 2.0);
     } else {
         // else return the element in the middle
-        return x[HISTORY_WIDTH/2];
+        return x[WINDOW_WIDTH/2];
     }
 }
 

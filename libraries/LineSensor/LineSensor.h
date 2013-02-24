@@ -33,6 +33,9 @@ private:
 	int windowColorR[WINDOW_WIDTH];
 	int windowColorG[WINDOW_WIDTH];
 	int windowColorB[WINDOW_WIDTH];
+
+	int median(int x[]);
+	int exponentialFilter(int value, int previous);
 };
 
 #endif
