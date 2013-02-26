@@ -501,7 +501,7 @@ bool Robot::searchLine() {
 	motion.moveForward(CRUISE_SPEED);
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
-		if (isOnBlackLine) {
+		if (isOnBlackLine()) {
 			motion.stop();
 		 	position.update();
 			adjustOrientation(fmod(currentDirection + PI, 2*PI)); // dietrofront 
