@@ -13,6 +13,9 @@ DistanceSensor::DistanceSensor() {
 
 void DistanceSensor::initProximity(){
 	pin = PROXIMITY_PIN;
+	pin5V = PROXIMITY_PIN_5V;
+	pinMode(pin5V, OUTPUT);
+	digitalWrite(pin5V, HIGH);
 	int distances[] = {3, 5, 10 , 15, 20, 25, 30, 35};
 	int values[] = {621, 325, 221, 178, 153, 136, 126, 113};
   num_samples = 8;
@@ -24,6 +27,9 @@ void DistanceSensor::initProximity(){
 
 void DistanceSensor::initHighDistanceTop(){
 	pin = HIGHDISTANCE_TOP_PIN;
+	pin5V = HIGHDISTANCE_TOP_PIN_5V;
+	pinMode(pin5V, OUTPUT);
+	digitalWrite(pin5V, HIGH);
 	int distances[] = {10, 20, 30, 40, 50, 75, 100, 125, 150};
 	int values[] = {585, 480, 360, 290, 230, 170, 135, 95, 80};
   num_samples = 9;
@@ -35,6 +41,9 @@ void DistanceSensor::initHighDistanceTop(){
 
 void DistanceSensor::initHighDistanceBottom(){
 	pin = HIGHDISTANCE_BOTTOM_PIN;
+	pin5V = HIGHDISTANCE_BOTTOM_PIN_5V;
+	pinMode(pin5V, OUTPUT);
+	digitalWrite(pin5V, HIGH);
 	int distances[] = {10, 20, 30, 40, 50, 75, 100, 125, 150, 175, 200};
 	int values[] = {550, 510, 400, 340, 270, 180, 120, 90, 60, 50, 40};
   num_samples = 11;
@@ -45,11 +54,15 @@ void DistanceSensor::initHighDistanceBottom(){
 }
 
 double DistanceSensor::distance() {
+	//switchOn();
+	//delay(50);
 	for(int i = 0; i < HISTORY_WIDTH; i++) {
 		history[i] = analogRead(pin);
 	}
+	//switchOff();
 	double value = exponentialFilter(median(history));
-	return interpolate(value);	
+	//return interpolate(value);
+	return value;	
 }
 
 double DistanceSensor::interpolate(double readValue) {
@@ -95,4 +108,13 @@ double DistanceSensor::median(double x[]) {
 double DistanceSensor::exponentialFilter(double value) {
 	previousValue = ALPHA_FILTER * value + (1 - ALPHA_FILTER) * previousValue;
 	return previousValue;
+}
+
+void DistanceSensor::switchOn() {
+	digitalWrite(pin5V, HIGH);
+}
+
+
+void DistanceSensor::switchOff() {
+	digitalWrite(pin5V, LOW);
 }

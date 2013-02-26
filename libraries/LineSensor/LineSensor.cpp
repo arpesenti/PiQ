@@ -38,6 +38,17 @@ char LineSensor::color() {
 	int greenValue = exponentialFilter(median(windowColorG), previousValueColorG);
 	int blueValue = exponentialFilter(median(windowColorB), previousValueColorB);
 
+	// int redValue = windowColorR[0];
+	// int greenValue = windowColorG[0];
+	// int blueValue = windowColorB[0];
+
+	Serial.print("Red: ");
+	Serial.print(redValue);
+	Serial.print(" Green: ");
+	Serial.print(greenValue);
+	Serial.print(" Blue: ");
+	Serial.println(blueValue);
+
 	previousValueColorR = redValue;
 	previousValueColorG = greenValue;
 	previousValueColorB = blueValue;
@@ -45,6 +56,7 @@ char LineSensor::color() {
 	int Rlevel = level(redValue);
 	int Glevel = level(greenValue);
 	int Blevel = level(blueValue);
+
 
 	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
 		return 'w';
@@ -98,7 +110,7 @@ int LineSensor::centerReflectance() {
 	return previousValueCenter;
 }
 
-int LineSensor::level(int component_intensity){
+int LineSensor::level(double component_intensity){
 	if (component_intensity < C_LOW_THRESHOLD)
 		return C_LOW;
 	if (component_intensity > C_HIGH_THRESHOLD)

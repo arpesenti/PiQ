@@ -11,11 +11,11 @@
 #define C_HIGH 2
 
 // threshold to determine the intensity of each RGB component
-#define C_LOW_THRESHOLD 500
-#define C_HIGH_THRESHOLD 600
+#define C_LOW_THRESHOLD 600
+#define C_HIGH_THRESHOLD 602
 
-#define WINDOW_WIDTH 5
-#define ALPHA_FILTER 0.6
+#define WINDOW_WIDTH 3
+#define ALPHA_FILTER 0.8
 
 class LineSensor {
 public:
@@ -27,7 +27,7 @@ public:
 	int centerReflectance();
 private:
 	ADJDS311 colorSensor;
-	int level(int component_intensity);
+	int level(double component_intensity);
 	int window[WINDOW_WIDTH];
 	int previousValueLeft;
 	int previousValueRight;

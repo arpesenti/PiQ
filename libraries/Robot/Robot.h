@@ -41,9 +41,9 @@
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 5
-#define CRUISE_SPEED 20
-#define ROTATIONAL_CRUISE_SPEED 2
+#define ACCELERATION_SPEED 45
+#define CRUISE_SPEED 50
+#define ROTATIONAL_CRUISE_SPEED 40
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
@@ -93,6 +93,7 @@ private:
 	bool isOnBlueLine();
 	void rotateToAngle(double angle);
 	void checkSpeedChange();
+	bool refindBlueLine();
 
 };
 
