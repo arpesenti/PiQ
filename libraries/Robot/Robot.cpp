@@ -481,37 +481,44 @@ double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
 bool Robot::searchLine() {
 	// PRECONDITION: robot nearby the home
 
-	// rotate toward home, PI
-	rotateToAngle(PI);
+	// rotate toward PI
+	double currentDirection = PI;
+	adjustOrientation(currentDirection);
 
-	// search line in a zig zag way
+	// search line first forward, then backward
 	unsigned long startTime = millis();
+	motion.moveForward(CRUISE_SPEED);
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
-		int x = position.getX();
-		int y = position.getY();
-		double distance = 0;
-		while (canMoveForward() && !isOnBlackLine() && distance < 30*MOUSE_SCALE && millis()-startTime < TIME_OUT) {
-			position.update();
-			motion.moveForward(CRUISE_SPEED);
-			distance = sqrt(square(x - position.getX()) + square(y - position.getY()));
-			position.update();
-		}
-		motion.stop();
-		position.update();
-		rotateLeft(PI); // dietrofront 
-		if (isOnBlueLine()) {
+		if (isOnBlackLine()) {
 			motion.stop();
-			position.update();
-			return true;
-		}
-		if (millis()-startTime > TIME_OUT) {
-			motion.stop();
-			position.update();
-			return false;
+		 	position.update();
+			adjustOrientation(fmod(currentDirection + PI, 2*PI)); // dietrofront 
 		}
 	}
-	return false;
+	if (isOnBlueLine()) {
+		motion.stop();
+		position.update();
+
+		// orienting to the right way of the line. Hypothesis: line is not going away from the home
+		int threshold = 200;
+		int rightReflectance = lineSensor.rightReflectance();
+		int leftReflectance = lineSensor.leftReflectance(); 
+		while (leftReflectance > threshold || rightReflectance > threshold) {
+			if (leftReflectance > rightReflectance) {
+				motion.rotateLeft(ROTATIONAL_CRUISE_SPEED);
+			} else {
+				motion.rotateRight(ROTATIONAL_CRUISE_SPEED);
+			}
+			rightReflectance = lineSensor.rightReflectance();
+			leftReflectance = lineSensor.leftReflectance(); 
+		} 
+		return true;
+	} else if (millis()-startTime > TIME_OUT) {
+		motion.stop();
+		position.update();
+		return false;
+	}
 }
 
 bool Robot::followLineToHome() {
@@ -570,6 +577,7 @@ bool Robot::refindBlueLine() {
 			Serial.println("refind blue line - rotate right");
 			rotateRight(2 * TOLERANCE_ANGLE);
 		} else {
+<<<<<<< HEAD
 			// make a complete rotation
 			Serial.println("make complete rotation");
 			double startAngle = position.getOrientation();
@@ -601,6 +609,9 @@ bool Robot::refindBlueLine() {
 					return false;
 				}
 			}
+=======
+
+>>>>>>> 363a2ce54354b1fe686660a2229f7bd1d52c9f94
 		}
 	}
 	if (isOnBlueLine())
@@ -641,16 +652,20 @@ bool Robot::escapeFromPanic() {
 			state = EXPLORE_SCAN;
 		} else if (command == REMOTE_ROTATELEFT) {
 			motion.stop();
-			rotateLeft(TOLERANCE_ANGLE);
+			rotateLeft(2*TOLERANCE_ANGLE);
 		} else if (command == REMOTE_ROTATERIGHT) {
 			motion.stop();
-			rotateRight(TOLERANCE_ANGLE);
+			rotateRight(2*TOLERANCE_ANGLE);
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
 			motion.moveForward(CRUISE_SPEED);
+			delay(100);
+			motion.stop();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
 			motion.moveBackward(CRUISE_SPEED);
+			delay(100);
+			motion.stop();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
 		}

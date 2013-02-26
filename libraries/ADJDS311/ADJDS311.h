@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <EEPROM.h>
 
 // ADJD-S311's I2C address, don't change
 #define ADJD_S311_ADDRESS 0x74
@@ -58,6 +59,9 @@ class ADJDS311{
     void ledOff();
 
     RGBC read();
+
+    void storeCalibration();
+    void loadCalibration();
     
  private:
  	int _led_pin;
