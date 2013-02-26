@@ -26,9 +26,9 @@ void setup() {
         Serial.begin(9600);
         Wire.begin();
 	robot.init();
-        delay(3000);
+        delay(1000);
         Serial.println("init");
-        delay(3000);
+        delay(1000);
         Serial.println(robot.followLineToHome());
 }
 

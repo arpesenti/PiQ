@@ -61,8 +61,9 @@ void Motion::setMinSpeed(int left, int right) {
 
 // positive drift -> rotate left
 void Motion::moveForwardWithDrift(int speed, int drift) {
-	int speedLeft   =  30 + constrain(speed/100.0 * availableSpeed + (drift / DAMPING), 0, availableSpeed); 
-  	int speedRight  =  30 + constrain(speed/100.0 * availableSpeed - (drift / DAMPING), 0, availableSpeed);
+	// set a lower minimum speed
+	int speedLeft   =  minSpeedLeft - 30 + constrain(speed/100.0 * (availableSpeed + 30) + (drift / DAMPING), 0, availableSpeed); 
+  	int speedRight  = minSpeedRight - 30 + constrain(speed/100.0 * (availableSpeed + 30) - (drift / DAMPING), 0, availableSpeed);
 
   	Serial.print("Speed left: ");
   	Serial.print(speedLeft);

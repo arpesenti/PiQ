@@ -122,17 +122,6 @@ bool Robot::scanForEgg() {
 				(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
 				(currentOrientation < arriveAngleMod && currentOrientation > startAngle)){
 		
-		distanceBottom = highDistanceBottom.distance();
-		if(distanceBottom < 100){
-			motion.stop();
-			double distanceTop = highDistanceTop.distance();
-			if(distanceTop - distanceBottom > DISTANCE_MARGIN){
-				motion.stop();
-				position.update();
-				return true;
-			}
-			motion.rotateLeft(speed);
-		}
 		if ( millis() - startTime > TIME_OUT){
 			enterPanicState();
 			break;
@@ -534,27 +523,38 @@ bool Robot::followLineToHome() {
 	// 		return false;
 	// 	}
 	// }
+
+	//*********************for test
+	while(!isOnBlueLine()){ };
 	int drift = 0;
 	unsigned long startTime = millis();
-	while (isOnBlueLine() && /*highDistanceTop.distance() > 30 &&*/ millis()-startTime < TIME_OUT ) {
-		drift = lineSensor.rightReflectance() - lineSensor.leftReflectance();
-		Serial.print("Drift: ");
-		Serial.println(drift);
-		motion.moveForwardWithDrift(3, drift);
-	}
-	Serial.println("Exit from the loop");
-	if (millis()-startTime > TIME_OUT) {
-		motion.stop();
-		enterPanicState();
-		return false;
-	} else if (!isOnBlueLine()) {
-		motion.stop();
-		return false;
-		if (!refindBlueLine()) {
+	bool tryToFollowLine = true;
+	
+	// continue until time out or not able to refind the Blue line
+	while(tryToFollowLine){
+		while (isOnBlueLine() && /*highDistanceTop.distance() > 30 &&*/ millis()-startTime < TIME_OUT ) {
+			drift = lineSensor.rightReflectance() - lineSensor.leftReflectance();
+			Serial.print("Drift: ");
+			Serial.println(drift);
+			motion.moveForwardWithDrift(3, drift);
+		}
+
+		Serial.println("Exit from the loop");
+		if (millis()-startTime > TIME_OUT) {
+			Serial.println("finished for time out in follow line to home");
+			motion.stop();
 			enterPanicState();
 			return false;
-		} else
-			return followLineToHome();
+		} else if (!isOnBlueLine()) {
+			motion.stop();
+			Serial.println("not on blu line - try to refind it");
+			if (!refindBlueLine()) {
+				enterPanicState();
+				return false;
+			} 
+			
+		}
+		
 	}
 	motion.stop();
 	return true;
@@ -563,12 +563,44 @@ bool Robot::followLineToHome() {
 bool Robot::refindBlueLine() {
 	unsigned long startTime = millis();
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT ) {
-		if (lineSensor.leftReflectance() - lineSensor.rightReflectance() > 100) {
-			rotateLeft(4*TOLERANCE_ANGLE);
-		} else if (lineSensor.rightReflectance() - lineSensor.leftReflectance() > 100) {
-			rotateRight(4*TOLERANCE_ANGLE);
+		if (lineSensor.leftReflectance() - lineSensor.rightReflectance() > 80) {
+			Serial.println("refind blue line - rotate left");
+			rotateLeft(2 * TOLERANCE_ANGLE);
+		} else if (lineSensor.rightReflectance() - lineSensor.leftReflectance() > 80) {
+			Serial.println("refind blue line - rotate right");
+			rotateRight(2 * TOLERANCE_ANGLE);
 		} else {
+			// make a complete rotation
+			Serial.println("make complete rotation");
+			double startAngle = position.getOrientation();
+			double arriveAngle = startAngle - 2 * TOLERANCE_ANGLE;
+			double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
+			double distanceBottom;
+			double currentOrientation = position.getOrientation();
+		
+			int speed = ROTATIONAL_CRUISE_SPEED;	
+			unsigned long startTime = millis();
 			
+			while (arriveAngle >= 0 ? 
+				(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
+				(currentOrientation < arriveAngleMod && currentOrientation > startAngle)){
+				
+				rotateLeft(2 * TOLERANCE_ANGLE);
+				
+				if (isOnBlueLine()){
+					motion.stop();
+					delay(20);
+					if(isOnBlueLine()) // recheck to be sure with stop motors
+						return true;
+					else
+						continue;	
+				}
+				
+				if( millis() - startTime > TIME_OUT){
+					motion.stop();
+					return false;
+				}
+			}
 		}
 	}
 	if (isOnBlueLine())
@@ -708,11 +740,11 @@ bool Robot::rotateToFreeDirection(){
 	
 bool Robot::isOnBlackLine(){
 	//test
-	//return false;
+	return false;
   // take into consideration if need to separate check of color when in rotation and in moveForward:
 	// the first doesn't need update, the second one does.
 
-	return lineSensor.color() == 'k';
+	//return lineSensor.color() == 'k';
 }
 
 
@@ -938,6 +970,8 @@ void Robot::recalibrate() {
 
 bool Robot::isOnBlueLine() {
 	//return lineSensor.color() == 'b';
+
+	// for test
 	Serial.println("Color: ");
 	char color = lineSensor.color();
 	Serial.println(color);
