@@ -492,37 +492,44 @@ double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
 bool Robot::searchLine() {
 	// PRECONDITION: robot nearby the home
 
-	// rotate toward home, PI
-	rotateToAngle(PI);
+	// rotate toward PI
+	double currentDirection = PI;
+	adjustOrientation(currentDirection);
 
-	// search line in a zig zag way
+	// search line first forward, then backward
 	unsigned long startTime = millis();
+	motion.moveForward(CRUISE_SPEED);
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
-		int x = position.getX();
-		int y = position.getY();
-		double distance = 0;
-		while (canMoveForward() && !isOnBlackLine() && distance < 30*MOUSE_SCALE && millis()-startTime < TIME_OUT) {
-			position.update();
-			motion.moveForward(CRUISE_SPEED);
-			distance = sqrt(square(x - position.getX()) + square(y - position.getY()));
-			position.update();
-		}
-		motion.stop();
-		position.update();
-		rotateLeft(PI); // dietrofront 
-		if (isOnBlueLine()) {
+		if (isOnBlackLine) {
 			motion.stop();
-			position.update();
-			return true;
-		}
-		if (millis()-startTime > TIME_OUT) {
-			motion.stop();
-			position.update();
-			return false;
+		 	position.update();
+			adjustOrientation(fmod(currentDirection + PI, 2*PI)); // dietrofront 
 		}
 	}
-	return false;
+	if (isOnBlueLine()) {
+		motion.stop();
+		position.update();
+
+		// orienting to the right way of the line. Hypothesis: line is not going away from the home
+		int threshold = 200;
+		int rightReflectance = lineSensor.rightReflectance();
+		int leftReflectance = lineSensor.leftReflectance(); 
+		while (leftReflectance > threshold || rightReflectance > threshold) {
+			if (leftReflectance > rightReflectance) {
+				motion.rotateLeft(ROTATIONAL_CRUISE_SPEED);
+			} else {
+				motion.rotateRight(ROTATIONAL_CRUISE_SPEED);
+			}
+			rightReflectance = lineSensor.rightReflectance();
+			leftReflectance = lineSensor.leftReflectance(); 
+		} 
+		return true;
+	} else if (millis()-startTime > TIME_OUT) {
+		motion.stop();
+		position.update();
+		return false;
+	}
 }
 
 bool Robot::followLineToHome() {
@@ -568,7 +575,7 @@ bool Robot::refindBlueLine() {
 		} else if (lineSensor.rightReflectance() - lineSensor.leftReflectance() > 100) {
 			rotateRight(4*TOLERANCE_ANGLE);
 		} else {
-			
+
 		}
 	}
 	if (isOnBlueLine())
