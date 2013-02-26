@@ -616,16 +616,20 @@ bool Robot::escapeFromPanic() {
 			state = EXPLORE_SCAN;
 		} else if (command == REMOTE_ROTATELEFT) {
 			motion.stop();
-			rotateLeft(TOLERANCE_ANGLE);
+			rotateLeft(2*TOLERANCE_ANGLE);
 		} else if (command == REMOTE_ROTATERIGHT) {
 			motion.stop();
-			rotateRight(TOLERANCE_ANGLE);
+			rotateRight(2*TOLERANCE_ANGLE);
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
 			motion.moveForward(CRUISE_SPEED);
+			delay(100);
+			motion.stop();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
 			motion.moveBackward(CRUISE_SPEED);
+			delay(100);
+			motion.stop();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
 		}
