@@ -577,7 +577,7 @@ bool Robot::refindBlueLine() {
 			Serial.println("refind blue line - rotate right");
 			rotateRight(2 * TOLERANCE_ANGLE);
 		} else {
-<<<<<<< HEAD
+
 			// make a complete rotation
 			Serial.println("make complete rotation");
 			double startAngle = position.getOrientation();
@@ -609,9 +609,6 @@ bool Robot::refindBlueLine() {
 					return false;
 				}
 			}
-=======
-
->>>>>>> 363a2ce54354b1fe686660a2229f7bd1d52c9f94
 		}
 	}
 	if (isOnBlueLine())
