@@ -21,6 +21,7 @@ class LineSensor {
 public:
 	LineSensor();
 	void init();
+	void init(bool calibrate);
 	char color();
 	int leftReflectance();
 	int rightReflectance();

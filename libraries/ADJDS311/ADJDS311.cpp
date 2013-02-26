@@ -298,3 +298,51 @@ unsigned char ADJDS311::readRegister(unsigned char address){
 int ADJDS311::readRegisterInt(unsigned char address){
   return readRegister(address) + (readRegister(address+1)<<8);
 }
+
+// Store calibration in EEPROM
+void ADJDS311::storeCalibration() {
+  int value = readRegisterInt(INT_CLEAR_LO);
+  EEPROM.write(8,lowByte(value));    
+  EEPROM.write(9,highByte(value));
+
+  value = readRegisterInt(INT_RED_LO);
+  EEPROM.write(10,lowByte(value));    
+  EEPROM.write(11, highByte(value));
+
+  value = readRegisterInt(INT_GREEN_LO);
+  EEPROM.write(12,lowByte(value));    
+  EEPROM.write(13,highByte(value));
+
+  value = readRegisterInt(INT_BLUE_LO);
+  EEPROM.write(14,lowByte(value));    
+  EEPROM.write(15,highByte(value));
+
+  EEPROM.write(16, readRegister(CAP_CLEAR));
+  EEPROM.write(17, readRegister(CAP_RED));
+  EEPROM.write(18, readRegister(CAP_GREEN));
+  EEPROM.write(19, readRegister(CAP_BLUE));
+}
+
+// Load calibration from EEPROM
+void ADJDS311::loadCalibration() {
+  int clear_lo = (EEPROM.read(9) * 256) + EEPROM.read(8);
+  int red_lo = (EEPROM.read(11) * 256) + EEPROM.read(10);
+  int green_lo = (EEPROM.read(13) * 256) + EEPROM.read(12);
+  int blue_lo = (EEPROM.read(15) * 256) + EEPROM.read(14);
+
+  unsigned char clear_cap = EEPROM.read(16);
+  unsigned char red_cap = EEPROM.read(17);
+  unsigned char green_cap = EEPROM.read(18);
+  unsigned char blue_cap = EEPROM.read(19);
+
+  writeInt(INT_CLEAR_LO, clear_lo);
+  writeInt(INT_RED_LO, red_lo);
+  writeInt(INT_GREEN_LO, green_lo);
+  writeInt(INT_BLUE_LO, blue_lo);
+
+  writeRegister(clear_cap, CAP_CLEAR);
+  writeRegister(red_cap, CAP_RED);
+  writeRegister(green_cap, CAP_GREEN);
+  writeRegister(blue_cap, CAP_BLUE);
+
+}

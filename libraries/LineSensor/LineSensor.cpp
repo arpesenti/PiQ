@@ -2,15 +2,26 @@
 
 LineSensor::LineSensor(): colorSensor(COLOR_SENSOR_LED_PIN) {}
 
-void LineSensor::init(){
+void LineSensor::init() {
+	init(false); // dafault: load calibration from EEPROM
+}
+
+void LineSensor::init(bool calibrate){
 	colorSensor.init();
   	colorSensor.ledOn(); //turn LED on
 	//Calibrate white 
 	//Need to hold white card in front (1-3mm) of it to calibrate from
-	colorSensor.calibrate();
-	Serial.println("");
-	Serial.println("end of calibration of Color sensor"); 
-	Serial.println("");
+	if (calibrate)
+	{
+		colorSensor.calibrate();
+		colorSensor.storeCalibration();
+		// Serial.println("");
+		// Serial.println("end of calibration of Color sensor"); 
+		// Serial.println("");
+	} else {
+		colorSensor.loadCalibration();
+	}
+	
 
 	//filter initialization
 	previousValueLeft = 0;
@@ -146,4 +157,5 @@ int LineSensor::exponentialFilter(int value, int previous) {
 	double x = ALPHA_FILTER * value + (1 - ALPHA_FILTER) * previous;
 	return (int)x;
 }
+
 
