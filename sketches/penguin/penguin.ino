@@ -21,6 +21,7 @@ Robot robot;
 int state;
 int result;
 int cruiseSpeed;
+int rotationalCruiseSpeed;
 
 void setup() {
         Serial.begin(9600);
@@ -35,10 +36,12 @@ void setup() {
 void loop() {
   switch(state){
     case WAIT: 
+      Serial.println("----- WAIT -----");
+      robot.escapeFromWait();
       break;
-      //update strategy
       
     case EXPLORE_SCAN:
+      Serial.println("----- EXPLORE_SCAN -----");
       if(robot.scanForEgg())
         changeStateTo(EXPLORE_REACHEGG);
       else
@@ -46,6 +49,7 @@ void loop() {
       break;
       
     case EXPLORE_REACHEGG:
+      Serial.println("----- EXPLORE_REACHEGG -----");
       if(robot.reachEgg())
         changeStateTo(CATCH);
       else
@@ -53,6 +57,7 @@ void loop() {
       break;
       
     case CATCH:
+      Serial.println("----- CATCH -----");
       if(robot.catchEgg())
         changeStateTo(COMEBACK_POSITIONING);
       else
@@ -60,6 +65,7 @@ void loop() {
       break;
       
     case COMEBACK_POSITIONING:
+      Serial.println("----- COMEBACK_POSITIONING -----");
       if(robot.positioningTowardHome()) 
         changeStateTo(COMEBACK_APPROACHING);
       else 
@@ -67,6 +73,7 @@ void loop() {
       break;
       
     case COMEBACK_APPROACHING:
+      Serial.println("----- COMEBACK_APPROACHING-----");
       result = robot.tryToApproach();
       if (result == APPROACH_FOUND_LINE)
         changeStateTo(COMEBACK_LINEFOLLOWING);
@@ -78,6 +85,7 @@ void loop() {
       break;
       
     case COMEBACK_LINEFOLLOWING:
+      Serial.println("----- COMEBACK_LINEFOLLOWING -----");
       if (robot.followLineToHome())
         changeStateTo(DEPOSIT);
       else
@@ -85,6 +93,7 @@ void loop() {
       break;
       
     case COMEBACK_LINESEARCHING:
+      Serial.println("----- COMEBACK_LINESEARCHING -----");
       if (robot.searchLine())
         changeStateTo(COMEBACK_LINEFOLLOWING);
       else
@@ -93,6 +102,7 @@ void loop() {
       break;
       
     case DEPOSIT:
+      Serial.println("----- DEPOSIT -----");
       if (robot.deposit()) {
         robot.newInit();
         changeStateTo(EXPLORE_SCAN);
@@ -102,6 +112,7 @@ void loop() {
       break;    
       
     case PANIC:
+      Serial.println("----- PANIC -----");
       Serial.println("Entered panic state");
       robot.escapeFromPanic();
       break;
