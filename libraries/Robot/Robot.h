@@ -65,6 +65,7 @@ public:
 	bool deposit();
 	bool newInit();
 	bool escapeFromPanic();
+	bool escapeFromWait();
 	// temporary for test
 	bool rotateRight(double angleRad);
 	bool rotateLeft(double angleRad);

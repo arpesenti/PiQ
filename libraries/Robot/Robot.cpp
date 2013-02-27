@@ -706,6 +706,17 @@ bool Robot::escapeFromPanic() {
 	}
 }
 
+bool Robot::escapeFromWait() {
+	while (state == WAIT) {
+		remote.update();
+		char command = remote.strategy();
+		if (command == NORMAL_STRATEGY) {
+			start();
+			state = EXPLORE_SCAN;
+		} 
+	}
+}
+
 char Robot::readStrategy() {
 	remote.update();
 	char strategy = remote.strategy();
