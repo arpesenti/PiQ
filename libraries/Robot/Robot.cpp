@@ -2,6 +2,7 @@
 
 extern int state;
 extern int cruiseSpeed;
+extern int rotationalCruiseSpeed;
 
 Robot::Robot() {
 
@@ -18,6 +19,7 @@ void Robot::init() {
 	//remote.init();
 	position.calibrate(motion, false);
 	cruiseSpeed = CRUISE_SPEED;
+	rotationalCruiseSpeed = ROTATIONAL_CRUISE_SPEED;
 }
 
 void Robot::start(){
@@ -116,7 +118,7 @@ bool Robot::scanForEgg() {
 	double distanceBottom;
 	double currentOrientation = position.getOrientation();
 
-	int speed = ROTATIONAL_CRUISE_SPEED;	
+	int speed = rotationalCruiseSpeed;	
 	unsigned long startTime = millis();
 	motion.rotateLeft(speed);
 	while (! areCloseAngles(currentOrientation, arriveAngle, TOLERANCE_ANGLE) ){
@@ -259,7 +261,7 @@ bool Robot::reachEgg() {
 	double distanceProximity = proximity.distance();
 	bool waitForPassingRobot = false;
 	double initialOrientation = position.getOrientation();
-	int speed = CRUISE_SPEED;
+	int speed = cruiseSpeed;
 	//test**********************************************
 	newDistanceBottom = 20;
 	//******************************************************
@@ -417,7 +419,7 @@ int Robot::tryToApproach() {
 	double currentOrientation = position.getOrientation();
 	double vectorPositionAngle = atan2(position.getY(), position.getX());
 	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
-	int speed = CRUISE_SPEED;
+	int speed = cruiseSpeed;
 	
 	if (angleToFollow < 0)
 		angleToFollow += 2*PI;
@@ -447,7 +449,7 @@ double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
 		}
 		position.update();
 		if (distanceNew < 3*radius)
-			speed = map(distanceNew, 0, 3 * radius, 0, CRUISE_SPEED);
+			speed = map(distanceNew, 0, 3 * radius, 0, cruiseSpeed);
 		position.update();		
 		if (distanceNew > distanceOld + DISTANCE_MARGIN){
 			motion.stop();
@@ -513,7 +515,7 @@ bool Robot::searchLine() {
 
 	// search line first forward, then backward
 	unsigned long startTime = millis();
-	motion.moveForward(CRUISE_SPEED);
+	motion.moveForward(cruiseSpeed);
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
 		if (isOnBlackLine()) {
@@ -532,9 +534,9 @@ bool Robot::searchLine() {
 		int leftReflectance = lineSensor.leftReflectance(); 
 		while (leftReflectance > threshold || rightReflectance > threshold) {
 			if (leftReflectance > rightReflectance) {
-				motion.rotateLeft(ROTATIONAL_CRUISE_SPEED);
+				motion.rotateLeft(rotationalCruiseSpeed);
 			} else {
-				motion.rotateRight(ROTATIONAL_CRUISE_SPEED);
+				motion.rotateRight(rotationalCruiseSpeed);
 			}
 			rightReflectance = lineSensor.rightReflectance();
 			leftReflectance = lineSensor.leftReflectance(); 
@@ -612,7 +614,7 @@ bool Robot::refindBlueLine() {
 			double distanceBottom;
 			double currentOrientation = position.getOrientation();
 		
-			int speed = ROTATIONAL_CRUISE_SPEED;	
+			int speed = rotationalCruiseSpeed;	
 			unsigned long startTime = millis();
 			
 			while (arriveAngle >= 0 ? 
@@ -649,10 +651,10 @@ bool Robot::deposit() {
 	feet.open();
 	delay(400);
 	int bumpDuration = 300;
-	motion.moveForward(CRUISE_SPEED);
+	motion.moveForward(cruiseSpeed);
 	delay(bumpDuration); // small bump to the just released egg
 	motion.stop();	
-	motion.moveBackward(CRUISE_SPEED);
+	motion.moveBackward(cruiseSpeed);
 	delay(bumpDuration);
 	motion.stop();
 	return true; // could it fail?
@@ -682,12 +684,12 @@ bool Robot::escapeFromPanic() {
 			rotateRight(2*TOLERANCE_ANGLE);
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
-			motion.moveForward(CRUISE_SPEED);
+			motion.moveForward(cruiseSpeed);
 			delay(100);
 			motion.stop();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
-			motion.moveBackward(CRUISE_SPEED);
+			motion.moveBackward(cruiseSpeed);
 			delay(100);
 			motion.stop();
 		} else if (command == REMOTE_STOP) {
@@ -716,7 +718,7 @@ bool Robot::rotateToFreeDirection(){
 	if(canMoveForward()) 
 		return true;
 	double distance = 100; // distance of obstacles
-	int speed = ROTATIONAL_CRUISE_SPEED;
+	int speed = rotationalCruiseSpeed;
 
 	// cycles eventually decreasing distance of obstacles
 	while( distance > 0){
@@ -795,7 +797,7 @@ bool Robot::rotateRight(double angleRad){
 	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
 
-	double speed = ROTATIONAL_CRUISE_SPEED;
+	double speed = rotationalCruiseSpeed;
 	double initialOrientation = position.getOrientation();
 	// toAngle must be between 0 and 2*PI
 	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
@@ -813,7 +815,7 @@ bool Robot::rotateRight(double angleRad){
 		millisFromStart = millis() - startTime;
 		//Serial.println(millisFromStart);
 		if (areCloseAngles(position.getOrientation(),toAngle, 4*TOLERANCE_ANGLE)) {
-			speed = map(distanceBetweenAngles(position.getOrientation(), toAngle), 0, PI, 0, ROTATIONAL_CRUISE_SPEED);
+			speed = map(distanceBetweenAngles(position.getOrientation(), toAngle), 0, PI, 0, rotationalCruiseSpeed);
 			if (! decelerated && millisFromStart > ACCELERATION_TIME) {
 				motion.rotateRight(speed);
 				decelerated = true;
@@ -821,7 +823,7 @@ bool Robot::rotateRight(double angleRad){
 		}
 
 		if (! decelerated && millisFromStart > ACCELERATION_TIME) {
-			motion.rotateRight(ROTATIONAL_CRUISE_SPEED);
+			motion.rotateRight(rotationalCruiseSpeed);
 			decelerated = true;
 		}
 		
@@ -858,7 +860,7 @@ bool Robot::rotateLeft(double angleRad){
 	Serial.print("toAngle : ");
 	Serial.println(toAngle);
 	bool decelerated = false;
-	int speed = ROTATIONAL_CRUISE_SPEED;
+	int speed = rotationalCruiseSpeed;
 	motion.rotateLeft(ACCELERATION_SPEED);
 
 	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
@@ -866,7 +868,7 @@ bool Robot::rotateLeft(double angleRad){
 		millisFromStart = millis() - startTime;
 		//Serial.println(millisFromStart);
 		if (areCloseAngles(position.getOrientation(),toAngle, 5*TOLERANCE_ANGLE)) {
-			speed = map(distanceBetweenAngles(position.getOrientation(), toAngle), 0, PI, 0, ROTATIONAL_CRUISE_SPEED);
+			speed = map(distanceBetweenAngles(position.getOrientation(), toAngle), 0, PI, 0, rotationalCruiseSpeed);
 			if (! decelerated && millisFromStart > ACCELERATION_TIME) {
 				motion.rotateLeft(speed);
 				//Serial.println("*****************");
@@ -1047,9 +1049,13 @@ void Robot::checkSpeedChange() {
 	int step = 5;
 	if (strategy == REMOTE_INCREASE_SPEED) {
 		if (cruiseSpeed + 5 <= 100)
-			cruiseSpeed += 5; 
+			cruiseSpeed += 5;
+	 	if (rotationalCruiseSpeed + 5 <= 100)
+			rotationalCruiseSpeed += 5;
 	} else if (strategy == REMOTE_DECREASE_SPEED) {
 		if (cruiseSpeed - 5 > 0)
 			cruiseSpeed -= 5;
+		if (rotationalCruiseSpeed -5 <= 0)
+			rotationalCruiseSpeed -= 5;
 	}
 }

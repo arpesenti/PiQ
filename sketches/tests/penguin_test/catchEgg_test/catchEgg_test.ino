@@ -21,6 +21,7 @@ Robot robot;
 int state;
 bool result;
 int cruiseSpeed;
+int rotationalCruiseSpeed;
 
 void setup() {
   Serial.begin(9600);
@@ -33,7 +34,6 @@ void setup() {
   result = robot.catchEgg();
   if (result == true)
     Serial.println("Egg catched! -------------");
-    robot
   else
     Serial.println("Not catched --------------"); 
   if (state == PANIC)

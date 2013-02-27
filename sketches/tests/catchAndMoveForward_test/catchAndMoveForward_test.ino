@@ -27,12 +27,14 @@ void setup() {
   feet.open();
   delay(1000);
   feet.close();
+  delay(1000);
+  motion.moveForward(70);
+  delay(2000);
+  motion.stop();
 }
 
 void loop() {
-  motion.moveForward(50);
-  delay(10000);
-  motion.stop();
+  
   //feet.open(80);
   //delay(1000);
   //feet.close(80);

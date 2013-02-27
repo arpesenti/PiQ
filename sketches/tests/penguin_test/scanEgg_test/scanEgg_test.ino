@@ -21,6 +21,7 @@ Robot robot;
 int state;
 bool result;
 int cruiseSpeed;
+int rotationalCruiseSpeed;
 
 void setup() {
   Serial.begin(9600);
