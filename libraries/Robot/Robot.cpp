@@ -692,8 +692,17 @@ bool Robot::escapeFromPanic() {
 			motion.stop();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
+		} else if (command == REMOTE_INCREASE_SPEED) {
+			if (cruiseSpeed + 5 <= 100)
+				cruiseSpeed += 5;
+	 		if (rotationalCruiseSpeed + 5 <= 100)
+				rotationalCruiseSpeed += 5;
+		} else if (command == REMOTE_DECREASE_SPEED) {
+			if (cruiseSpeed - 5 > 0)
+				cruiseSpeed -= 5;
+			if (rotationalCruiseSpeed -5 <= 0)
+				rotationalCruiseSpeed -= 5;
 		}
-		checkSpeedChange();
 	}
 }
 
