@@ -12,7 +12,7 @@ void loop()
 {
   if (irrecv.decode(&results)) // have we received an IR signal?
   {
-    Serial.println(results.value); // display it on serial monitor in hexadecimal
+    Serial.println(results.value, HEX); // display it on serial monitor in hexadecimal
     if(results.value == 284131965)
       Serial.println("uno");
     irrecv.resume();// receive the next value
