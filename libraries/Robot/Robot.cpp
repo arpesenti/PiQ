@@ -349,7 +349,8 @@ bool Robot::reachEgg() {
 }
 bool Robot::catchEgg() {
 	// PRECONDITION robot near the egg
-	double eggDistance = proximity.distance();
+	
+	/*double eggDistance = proximity.distance();
 	if (eggDistance > 8)
 		return false; //egg too far
 	feet.close(50);
@@ -359,7 +360,12 @@ bool Robot::catchEgg() {
 	else {
 		feet.open(); //egg missed
 		return false;
-	}
+	}*/
+
+	// *******************test
+	feet.close(50);
+	return true;
+	// *******************end test
 }
 
 
@@ -641,10 +647,11 @@ bool Robot::deposit() {
 	// PRECONDITION: has the home in front
 
 	feet.open();
-	int bumpDuration = 100;
+	delay(400);
+	int bumpDuration = 300;
 	motion.moveForward(CRUISE_SPEED);
 	delay(bumpDuration); // small bump to the just released egg
-	motion.stop();
+	motion.stop();	
 	motion.moveBackward(CRUISE_SPEED);
 	delay(bumpDuration);
 	motion.stop();
