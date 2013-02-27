@@ -5,8 +5,8 @@
 #include <Pins.h> 
 
 #define MAX_DIMENSION_SAMPLES 11
-#define HISTORY_WIDTH 5
-#define ALPHA_FILTER 0.8
+#define HISTORY_WIDTH 3
+#define ALPHA_FILTER 1.0
 
 struct sample{
 	int distance;
@@ -20,11 +20,8 @@ public:
 	void initHighDistanceTop();
 	void initHighDistanceBottom();
 	double distance();
-	void switchOn();
-	void switchOff();
 private:
 	int pin;
-	int pin5V;
 	sample table[MAX_DIMENSION_SAMPLES]; 
 	int num_samples;
 	double previousValue;

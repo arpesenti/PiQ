@@ -8,11 +8,12 @@ Robot::Robot() {
 }
 
 void Robot::init() {
+	Serial.println("Robot init");
 	motion.init();
 	highDistanceTop.initHighDistanceTop();
 	highDistanceBottom.initHighDistanceBottom();
 	proximity.initProximity();
-	lineSensor.init();
+	lineSensor.init(false);
 	//feet.init();
 	//remote.init();
 	position.calibrate(motion, false);
@@ -118,11 +119,30 @@ bool Robot::scanForEgg() {
 	int speed = ROTATIONAL_CRUISE_SPEED;	
 	unsigned long startTime = millis();
 	motion.rotateLeft(speed);
-	while (arriveAngle >= 0 ? 
-				(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
-				(currentOrientation < arriveAngleMod && currentOrientation > startAngle)){
-		
+	while (! areCloseAngles(currentOrientation, arriveAngle, TOLERANCE_ANGLE) ){
+		distanceBottom = highDistanceBottom.distance();
+		Serial.println(distanceBottom);
+		if(distanceBottom < 80){
+			motion.stop();
+			Serial.println("Entered in <80");
+			double distanceTop = highDistanceTop.distance();
+			if(distanceTop - distanceBottom > DISTANCE_MARGIN){
+				Serial.println("Entered in found");
+				Serial.print("Bottom: ");
+				Serial.print(distanceBottom);
+				Serial.print(" Top: ");
+				Serial.println(distanceTop);
+				motion.stop();
+				return true;
+			} else {
+				motion.rotateLeft(speed);
+				delay(20);
+			}
+		}
+
 		if ( millis() - startTime > TIME_OUT){
+			motion.stop();
+			Serial.println("Entered in timeout");
 			enterPanicState();
 			break;
 		}
@@ -134,10 +154,10 @@ bool Robot::scanForEgg() {
 		}
 		currentOrientation = position.getOrientation();
 	}
-
+	motion.stop();
 	return false;
 	
-}
+} 
 
 bool Robot::changePosition(){
 	motion.stop();

@@ -7,8 +7,8 @@
 // right motor : motor 2 on the motorShield
 
 #define IR_PIN 44
-#define LEFT_SERVO_PIN 9
-#define RIGHT_SERVO_PIN 10
+#define LEFT_SERVO_PIN 10
+#define RIGHT_SERVO_PIN 9
 #define MOUSE_CLOCK_PIN 6
 #define MOUSE_DATA_PIN 5
 

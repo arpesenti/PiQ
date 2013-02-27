@@ -33,6 +33,7 @@ void setup() {
   result = robot.catchEgg();
   if (result == true)
     Serial.println("Egg catched! -------------");
+    robot
   else
     Serial.println("Not catched --------------"); 
   if (state == PANIC)

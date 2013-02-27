@@ -11,8 +11,6 @@ void setup(){
   highTop.initHighDistanceTop();
   highBottom.initHighDistanceBottom();
   Serial.println("end initialization");
-  highTop.switchOff();
-  highBottom.switchOff();
 }
 
 void loop(){

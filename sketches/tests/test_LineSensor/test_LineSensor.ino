@@ -2,12 +2,13 @@
 #include <ADJDS311.h>
 #include <Pins.h>
 #include <LineSensor.h>
+#include <EEPROM.h>
 
 LineSensor lineSensor;
 
 void setup(){
   Serial.begin(9600);
-  lineSensor.init();
+  lineSensor.init(false);
 }
 
 void loop(){

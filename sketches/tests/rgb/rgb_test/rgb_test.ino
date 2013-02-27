@@ -1,5 +1,6 @@
 #include <ADJDS311.h>
 #include <Wire.h>
+#include <EEPROM.h>
 
 // Connect to SDA to A4, SCL to A5 
 
@@ -10,7 +11,7 @@ ADJDS311 colorSensor(SENSORLED_PIN);
 void setup(){
   Serial.begin(9600);
   
-  colorSensor.init();
+  colorSensor.init(true);
   colorSensor.ledOn(); //turn LED on
   
   //Calibrate white 
