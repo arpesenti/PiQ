@@ -15,8 +15,8 @@ void Robot::init() {
 	highDistanceBottom.initHighDistanceBottom();
 	proximity.initProximity();
 	lineSensor.init(false);
-	//feet.init();
-	//remote.init();
+	feet.init();
+	remote.init();
 	position.calibrate(motion, false);
 	cruiseSpeed = CRUISE_SPEED;
 	rotationalCruiseSpeed = ROTATIONAL_CRUISE_SPEED;
@@ -118,9 +118,8 @@ bool Robot::scanForEgg() {
 	double distanceBottom;
 	double currentOrientation = position.getOrientation();
 
-	int speed = rotationalCruiseSpeed;	
 	unsigned long startTime = millis();
-	motion.rotateLeft(speed);
+	motion.rotateLeft(rotationalCruiseSpeed);
 	while (! areCloseAngles(currentOrientation, arriveAngle, TOLERANCE_ANGLE) ){
 		distanceBottom = highDistanceBottom.distance();
 		Serial.println(distanceBottom);
@@ -137,7 +136,7 @@ bool Robot::scanForEgg() {
 				motion.stop();
 				return true;
 			} else {
-				motion.rotateLeft(speed);
+				motion.rotateLeft(rotationalCruiseSpeed);
 				delay(20);
 			}
 		}
@@ -155,6 +154,7 @@ bool Robot::scanForEgg() {
 			return false;
 		}
 		currentOrientation = position.getOrientation();
+		checkSpeedChange();
 	}
 	motion.stop();
 	return false;
@@ -174,7 +174,7 @@ bool Robot::changePosition(){
 	
 	bool decelerated = false;
 
-	int speed = 25;
+	int speed = cruiseSpeed;
 	
 	if(!rotateToFreeDirection()) 
 		return false; // not able to find a free direction - enter in panic state
@@ -268,7 +268,7 @@ bool Robot::reachEgg() {
 	
 	// 1st step : move closer such that proximity senses it
 	if (newDistanceBottom > 30 && distanceProximity > 30){
-		motion.moveForward(speed);		
+		motion.moveForward(cruiseSpeed);		
 		while(newDistanceBottom < 30){
 			position.update();
 			if(newDistanceBottom - oldDistanceBottom > 20){ // give a bit of tolerance on measurement errors
@@ -309,7 +309,7 @@ bool Robot::reachEgg() {
 	Serial.println(newProx);
 	
 
-	motion.moveForward(speed);
+	motion.moveForward(cruiseSpeed);
 	// 2nd step : get very close to egg
 	while(newProx > 5){
 		position.update();
@@ -320,7 +320,7 @@ bool Robot::reachEgg() {
 			if(tryToRefindEgg() == false)
 				return false;			
 			else
-				motion.moveForward(speed);
+				motion.moveForward(cruiseSpeed);
 		}
 
 		position.update();
@@ -331,7 +331,7 @@ bool Robot::reachEgg() {
 			if(tryToRefindEgg() == false)
 				return false;
 			else
-				motion.moveForward(speed);
+				motion.moveForward(cruiseSpeed);
 						
 		}
 
@@ -352,22 +352,17 @@ bool Robot::reachEgg() {
 bool Robot::catchEgg() {
 	// PRECONDITION robot near the egg
 	
-	/*double eggDistance = proximity.distance();
+	double eggDistance = proximity.distance();
 	if (eggDistance > 8)
 		return false; //egg too far
-	feet.close(50);
+	feet.close();
 	eggDistance = proximity.distance();
 	if (eggDistance > 4) 
 		return true; //egg on board
 	else {
 		feet.open(); //egg missed
 		return false;
-	}*/
-
-	// *******************test
-	feet.close(50);
-	return true;
-	// *******************end test
+	}
 }
 
 
@@ -424,8 +419,8 @@ int Robot::tryToApproach() {
 	if (angleToFollow < 0)
 		angleToFollow += 2*PI;
 	
-//************************************** 
-double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
+	//************************************** 
+	double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
 	
 	motion.moveForward(speed);
 	while(distanceNew > radius){
@@ -495,6 +490,8 @@ double NewDistanceLimit = distanceNew - DISTANCE_FOR_ADJUSTING_ANGLE;
 				speed = speed / 2;
 			motion.moveForward(speed);
 		}
+		checkSpeedChange();
+		speed = cruiseSpeed;
 	}
 			
 	motion.stop();
@@ -523,6 +520,7 @@ bool Robot::searchLine() {
 		 	position.update();
 			adjustOrientation(fmod(currentDirection + PI, 2*PI)); // dietrofront 
 		}
+		checkSpeedChange();
 	}
 	if (isOnBlueLine()) {
 		motion.stop();
@@ -695,6 +693,7 @@ bool Robot::escapeFromPanic() {
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
 		}
+		checkSpeedChange();
 	}
 }
 
@@ -729,7 +728,7 @@ bool Robot::rotateToFreeDirection(){
 		double currentOrientation = startAngle;
 
 		bool switchRotation = false;
-		motion.rotateLeft(speed); // 10% speed
+		motion.rotateLeft(rotationalCruiseSpeed); // 10% speed
 		while (highDistanceTop.distance() < distance && 
 					(arriveAngle >= 0 ? 
 						(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
@@ -742,7 +741,7 @@ bool Robot::rotateToFreeDirection(){
 				if(!switchRotation){
 					switchRotation = true;
 					startTime = millis();
-					motion.rotateRight(speed);
+					motion.rotateRight(rotationalCruiseSpeed);
 				}else{
 					break;
 				}
@@ -757,10 +756,11 @@ bool Robot::rotateToFreeDirection(){
 				}else{
 					switchRotation = true;
 					startTime = millis();
-					motion.rotateRight(speed);
+					motion.rotateRight(rotationalCruiseSpeed);
 				}
 			}
 			currentOrientation = position.getOrientation();
+			checkSpeedChange();
 		}
 		
 		motion.stop();
@@ -835,11 +835,12 @@ bool Robot::rotateRight(double angleRad){
 		}
 		if (isOnBlackLine())
 			return rotateLeft(angleRad);
+		checkSpeedChange();
 	}
 	motion.stop();
 	position.clearMouseBuffer();
 	Serial.println("Arriving angle");
-  Serial.println(position.getOrientation());
+  	Serial.println(position.getOrientation());
 	return true;
 	
 }
@@ -888,11 +889,12 @@ bool Robot::rotateLeft(double angleRad){
 		}
 		if (isOnBlackLine())
 			return rotateRight(angleRad);
+		checkSpeedChange();
 	}
 	motion.stop();
 	position.clearMouseBuffer();	
 	Serial.println("Arriving angle");
-  Serial.println(position.getOrientation());
+  	Serial.println(position.getOrientation());
 	return true;
 }
 
@@ -908,7 +910,7 @@ bool Robot::moveBackward(double distanceToDo){
 	double deltaX = 0;
 	double deltaY = 0;
 	double distance = 0.0;
-	int speed = 20; // 20%
+	int speed = cruiseSpeed;
 	motion.moveBackward(speed);
 	while(distance < distanceToDo_mouse){
 		position.update();
@@ -917,6 +919,7 @@ bool Robot::moveBackward(double distanceToDo){
 		deltaY = square(position.getY()-startY);
 		position.update();
 		distance = sqrt(deltaX + deltaY) / MOUSE_SCALE;
+		checkSpeedChange();
 	}
 	motion.stop();
 	position.update();
