@@ -8,7 +8,7 @@ LineSensor lineSensor;
 
 void setup(){
   Serial.begin(9600);
-  lineSensor.init(false);
+  lineSensor.init(true);
 }
 
 void loop(){
