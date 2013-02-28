@@ -68,32 +68,36 @@ char LineSensor::color() {
 	int Glevel = level(greenValue);
 	int Blevel = level(blueValue);
 
+	if (Rlevel > 870 && Glevel > 800 && Blevel > 450 && Blevel < 700)
+		return 'o';
 
-	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
-		return 'w';
-	if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_LOW) // black
-		return 'k';
-	if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_HIGH) // blue
-		return 'b';
+	// if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
+	// 	return 'w';
+	// if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_LOW) // black
+	// 	return 'k';
+	// if (Rlevel == C_LOW && Glevel == C_LOW && Blevel == C_HIGH) // blue
+	// 	return 'b';
 
-	// not strictly necessary for our purpose, just for testing the sensor
+	// // not strictly necessary for our purpose, just for testing the sensor
 	
-	// CYAN -> HIGH: BLU GREEN
-	//  YELLOW -> HIGH: RED GREEN
-	//  MAGENTA -> HIGH: BLU RED
-	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_LOW) // red
-		return 'r';
-	if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_LOW) // green
-		return 'g';
-	if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_LOW) // yellow
-		return 'y';
-	if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_HIGH) // magenta
-		return 'm';
-	if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_HIGH) // cyan
-		return 'c';
+	// // CYAN -> HIGH: BLU GREEN
+	// //  YELLOW -> HIGH: RED GREEN
+	// //  MAGENTA -> HIGH: BLU RED
+	// if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_LOW) // red
+	// 	return 'r';
+	// if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_LOW) // green
+	// 	return 'g';
+	// if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_LOW) // yellow
+	// 	return 'y';
+	// if (Rlevel == C_HIGH && Glevel == C_LOW && Blevel == C_HIGH) // magenta
+	// 	return 'm';
+	// if (Rlevel == C_LOW && Glevel == C_HIGH && Blevel == C_HIGH) // cyan
+	// 	return 'c';
 	
-	return 'n'; // not a known color
+	// return 'n'; // not a known color
 }
+
+
 
 int LineSensor::leftReflectance() {
 	for (int i = 0; i< WINDOW_WIDTH; i++) {

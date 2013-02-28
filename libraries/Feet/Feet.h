@@ -6,8 +6,8 @@
 #include <Pins.h>
 
 #define OPEN_ANGLE 45
-#define LEFT_CLOSED_ANGLE 178
-#define RIGHT_CLOSED_ANGLE 2
+#define LEFT_CLOSED_ANGLE 175
+#define RIGHT_CLOSED_ANGLE 5
 #define NUMBER_OF_STEPS 5
 
 class Feet {

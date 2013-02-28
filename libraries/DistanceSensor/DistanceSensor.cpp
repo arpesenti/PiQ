@@ -13,9 +13,9 @@ DistanceSensor::DistanceSensor() {
 
 void DistanceSensor::initProximity(){
 	pin = PROXIMITY_PIN;
-	int distances[] = {3, 5, 10 , 15, 20, 25, 30, 35};
-	int values[] = {621, 325, 221, 178, 153, 136, 126, 113};
-  num_samples = 8;
+	int distances[] = {3, 5, 7, 10, 16, 20, 50};
+	int values[] = {600, 460, 345, 260, 180, 145, 100};
+  num_samples = 7;
   for(int i = 0; i < num_samples; i++){
 		table[i].distance = distances[i];
 		table[i].value = values[i];
@@ -24,8 +24,8 @@ void DistanceSensor::initProximity(){
 
 void DistanceSensor::initHighDistanceTop(){
 	pin = HIGHDISTANCE_TOP_PIN;
-	int distances[] = {15, 20, 25, 30, 40, 60, 80, 100, 120, 150};
-	int values[] = {540, 515, 470, 400, 295, 210, 140, 100, 80, 50};
+	int distances[] = {15, 20, 25, 30, 40, 50, 60, 70, 80, 100, 120, 150};
+	int values[] = {540, 500, 440, 380, 300, 250, 205, 180, 160, 100, 80, 50};
   num_samples = 10;
   for(int i = 0; i < num_samples; i++){
 		table[i].distance = distances[i];
@@ -35,8 +35,8 @@ void DistanceSensor::initHighDistanceTop(){
 
 void DistanceSensor::initHighDistanceBottom(){
 	pin = HIGHDISTANCE_BOTTOM_PIN;
-	int distances[] = {15, 20, 25, 30, 40, 60, 80, 100, 120, 150};
-	int values[] = {527, 500, 455, 390, 280, 200, 150, 115, 100, 50};
+	int distances[] = {15, 20, 25, 30, 40, 50, 60, 70, 80, 100, 120, 150};
+	int values[] = {540, 490, 435, 375, 295, 245, 200, 175, 160, 115, 100, 50};
   num_samples = 10;
   for(int i = 0; i < num_samples; i++){
 		table[i].distance = distances[i];

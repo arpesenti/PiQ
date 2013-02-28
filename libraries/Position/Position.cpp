@@ -12,6 +12,7 @@ Position::Position(): mouse(MOUSE_CLOCK_PIN, MOUSE_DATA_PIN), compass() {
 
 bool Position::init() {
 	// inizitialize mouse
+	Serial.println("Enter init of Position");
 	mouseInit();
 	readCal(); // TODO: check if calibration is already in EEPROM. If not initialize xMax,.. to 0
 	relativeAngle = updateAngle();
@@ -119,7 +120,7 @@ void Position::calibrate(Motion &motion, bool newCalibration) {
 		Serial.println(compass.GetErrorText(error));
 	}
 	if (newCalibration) {
-		int speed = 2;
+		int speed = 10;
 		motion.rotateRight(speed);
 		for (int index = 0; index < 16; index++) {
        	  	for(int x=0;x<100;x++) {  //continualy read the raw axis data while waiting for operator to slowly rotate compass to next position

@@ -12,27 +12,39 @@ void Feet::init() {
 void Feet::close(int speed) {
 	if (areOpen)
 	{
+		// leftServo.attach(LEFT_SERVO_PIN);
+		// rightServo.attach(RIGHT_SERVO_PIN);
+		delay(100);
 		write(&leftServo, LEFT_CLOSED_ANGLE, speed);
 		write(&rightServo, RIGHT_CLOSED_ANGLE, speed);
 		areOpen = false;
+		// leftServo.detach();
+		// rightServo.detach();
 	}
 }
 
 void Feet::open(int speed) {
 	if (!areOpen)
 	{
+		// leftServo.attach(LEFT_SERVO_PIN);
+		// rightServo.attach(RIGHT_SERVO_PIN);
+		delay(100);
 		write(&leftServo, LEFT_CLOSED_ANGLE - OPEN_ANGLE, speed);
 		write(&rightServo, RIGHT_CLOSED_ANGLE + OPEN_ANGLE, speed);
 		areOpen = true;
+		// leftServo.detach();
+		// rightServo.detach();
 	}
 }
 
 void Feet::open() {
-	open(100);
+	leftServo.write(LEFT_CLOSED_ANGLE - OPEN_ANGLE);
+	rightServo.write(RIGHT_CLOSED_ANGLE + OPEN_ANGLE);
 }
 
 void Feet::close() {
-	close(100);
+	leftServo.write(LEFT_CLOSED_ANGLE);
+	rightServo.write(RIGHT_CLOSED_ANGLE);
 }
 
 // move servo to angle in degree with speed in percentage
