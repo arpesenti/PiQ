@@ -1,5 +1,5 @@
 #include <IRremote.h> // use the library
-int receiver = 11; // pin 1 of IR receiver to Arduino digital pin 11
+int receiver = 44; // pin 1 of IR receiver to Arduino digital pin 11
 IRrecv irrecv(receiver); // create instance of 'irrecv'
 decode_results results;
 

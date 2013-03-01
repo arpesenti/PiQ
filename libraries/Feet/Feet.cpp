@@ -48,6 +48,17 @@ void Feet::open() {
 }
 }
 
+void Feet::partialOpen() {
+	for (int i =0; i< 10; i++) {
+	leftServo.write(LEFT_CLOSED_ANGLE - OPEN_ANGLE);
+	delay(15);
+	SoftwareServo::refresh();
+	rightServo.write(RIGHT_CLOSED_ANGLE + OPEN_ANGLE);
+	delay(15);
+	SoftwareServo::refresh(); 
+}
+}
+
 void Feet::close() {
 	for (int i =0; i< 10; i++) {
 	leftServo.write(LEFT_CLOSED_ANGLE);

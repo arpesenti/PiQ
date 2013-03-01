@@ -6,6 +6,7 @@ Feet feet;
 
 void setup() {
   feet.init();
+  //feet.close();
 }
 
 void loop() {

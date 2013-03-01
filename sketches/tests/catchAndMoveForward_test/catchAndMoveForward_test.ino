@@ -8,7 +8,7 @@
 #include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <IRremote.h>
 #include <ADJDS311.h>
 #include <Wire.h>
@@ -30,6 +30,16 @@ void setup() {
   delay(1000);
   motion.moveForward(70);
   delay(2000);
+  motion.stop();
+  motion.rotateLeft(90);
+  delay(1000);
+  motion.stop();
+  delay(1000);
+  motion.moveForward(70);
+  delay(2000);
+  motion.stop();
+  motion.rotateLeft(90);
+  delay(1000);
   motion.stop();
 }
 

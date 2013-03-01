@@ -8,7 +8,7 @@
 #include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <IRremote.h>
 #include <ADJDS311.h>
 #include <Wire.h>
@@ -28,12 +28,12 @@ void setup() {
         Wire.begin();
 	state = EXPLORE_REACHEGG;
 	robot.init();
-        robot.start();
         delay(3000);
         Serial.println("init");
 }
 
 void loop() {
+  delay(1000);
   switch(state){
     case WAIT: 
       Serial.println("----- WAIT -----");
@@ -47,7 +47,11 @@ void loop() {
       else
 	changeStateTo(EXPLORE_CHANGE_POSITION);
       break;
-      
+    case EXPLORE_CHANGE_POSITION:
+      Serial.println("----- CHANGE_POSITION ------");
+      if (robot.changePosition())
+        changeStateTo(EXPLORE_SCAN);
+      break;  
     case EXPLORE_REACHEGG:
       Serial.println("----- EXPLORE_REACHEGG -----");
       if(robot.reachEgg())
