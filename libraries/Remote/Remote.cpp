@@ -36,7 +36,9 @@ void Remote::update() {
 			currentStrategy = REMOTE_INCREASE_SPEED;
 		} else if (value == REMOTE_DECREASE_SPEED_BUTTON) {
 			currentStrategy = REMOTE_DECREASE_SPEED;
-		}
+		} else if (value == SEARCH_LINE_STRATEGY_BUTTON) {
+			currentStrategy = SEARCH_LINE_STRATEGY;
+		} 
 
     	receiver.resume();
 	} 

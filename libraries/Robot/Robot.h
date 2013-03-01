@@ -27,6 +27,7 @@
 
 #define MOUSE_SCALE 85
 #define TIME_OUT 30000
+#define SHORT_TIME_OUT 10000
 #define TOLERANCE_ANGLE 0.1
 #define DISTANCE_MARGIN 40
 #define ACCELERATION_TIME 50
@@ -70,6 +71,10 @@ public:
 	bool rotateRight(double angleRad);
 	bool rotateLeft(double angleRad);
 	void recalibrate();
+	bool rotateToFreeDirection();
+	bool comeBackHomeSimple();
+	bool changePositionSimple();
+	bool searchEggSimple();
 private:
 	Position position;
 	Motion motion;
@@ -81,7 +86,7 @@ private:
 	Remote remote;
 	bool adjustOrientation(double angleToFollow);
 	void enterPanicState();
-  	bool rotateToFreeDirection();
+  	
  	bool moveBackward(double distanceToDo);
   	bool canMoveForward();
   

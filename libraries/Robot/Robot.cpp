@@ -26,7 +26,7 @@ void Robot::start(){
 	position.init();
 
 	// ********************************* no need to check obstacles and lines when exiting from home
-	int speed = 20; // 20%
+	int speed = CRUISE_SPEED/2; 
 
 	double distance = 0; // made distance cm
 	double NewDistanceLimit = 10; // cm
@@ -50,7 +50,7 @@ void Robot::start(){
 		// check time out
 		elapsedTime = millis() - startTime;
 		position.update();
-		if (elapsedTime  > TIME_OUT){
+		if (elapsedTime  >  SHORT_TIME_OUT){
 			enterPanicState();
 			break;
 		}
@@ -78,17 +78,17 @@ void Robot::start(){
 		position.update();
 		Serial.println(position.getX());
 		position.update();
-  		Serial.println(position.getY());
-  		position.update();
+  	Serial.println(position.getY());
+  	position.update();
 		
 	}
 	Serial.println("Exit while");
 	motion.stop();
 	position.update();
-	//position.reset(); // da rimettere!!!!
+	position.reset(); // da rimettere!!!!
 	Serial.println(position.getX());
-  	Serial.println(position.getY());
-  	Serial.println(position.getOrientation());
+  Serial.println(position.getY());
+  Serial.println(position.getOrientation());
 	//*******************************
 
 }
@@ -147,15 +147,21 @@ bool Robot::scanForEgg() {
 				Serial.print("Bottom: ");
 				Serial.println(highDistanceBottom.distance());
 				distanceBottom = highDistanceBottom.distance();
-				while (distanceBottom > 60) {
+				while (distanceBottom > 60 && millis() - startTime < TIME_OUT) {
 					rotateRight(TOLERANCE_ANGLE+0.01);
 					delay(100);
 					distanceBottom = highDistanceBottom.distance();
 				}
+				if(millis() - startTime < TIME_OUT){
+					motion.stop();
+					Serial.println("Entered in timeout");
+					enterPanicState();
+					return false;
+				}
 				return true;
 			} else {
 				motion.rotateLeft(rotationalCruiseSpeed);
-				delay(20);
+				delay(10);
 			}
 		}
 
@@ -166,11 +172,11 @@ bool Robot::scanForEgg() {
 			break;
 		}
 
-		if( isOnBlackLine()){
-			motion.stop();
-			rotateRight(PI/2);
-			return false;
-		}
+		//if( isOnBlackLine()){
+		//	motion.stop();
+		//	rotateRight(PI/2);
+		//	return false;
+		//}
 		currentOrientation = position.getOrientation();
 		checkSpeedChange();
 	}
@@ -179,6 +185,8 @@ bool Robot::scanForEgg() {
 	
 } 
 
+// change position of a fixed distance
+// return false if not able to find a free direction to move - panic state
 bool Robot::changePosition(){
 	motion.stop();
 	int startX = position.getX();
@@ -203,30 +211,33 @@ bool Robot::changePosition(){
 
 	motion.moveForward(speed);
 	while (distance < distanceToCover){
-		// check black line
-		if(isOnBlackLine()){
-			motion.stop();
-			position.update();
-			moveBackward(10 * MOUSE_SCALE); // distance to do backward
-			position.update();
-			if(!rotateRight(PI/2)) 
-				return false; // panic state	
-			motion.moveForward(speed);	
+		// check black line - no more needed *** FIELD IS DELIMITED WITH WALLS
+		//if(isOnBlackLine()){
+		//	motion.stop();
+		//	position.update();
+		//	moveBackward(10 * MOUSE_SCALE); // distance to do backward
+		//	position.update();
+		//	if(!rotateRight(PI/2)) 
+		//		return false; // panic state	
+		//	motion.moveForward(speed);	
 			
-		}
-		position.update();
-		// check obstacles
-		if(!canMoveForward()){
-			motion.stop();
-			position.update();
-			delay(4000); // wait for passing robot
-			if(!canMoveForward()){
-				if(!rotateToFreeDirection()) 
-					return false; // panic state
-			}
-			position.update();
-			motion.moveForward(speed);
-		}
+		//}
+		//position.update();
+
+		// check obstacles - DO IT ONLY WHEN YOU STOP TO UPDATE ANGLE
+		
+
+		//if(!canMoveForward()){
+		//	motion.stop();
+		//	position.update();
+		//	delay(4000); // wait for passing robot
+		//	if(!canMoveForward()){
+		//		if(!rotateToFreeDirection()) 
+		//			return false; // panic state
+		//	}
+		//	position.update();
+		//	motion.moveForward(speed);
+		//}
 		
 		// update made distance
 		position.update();
@@ -258,6 +269,16 @@ bool Robot::changePosition(){
 				speed = speed / 2;
 				decelerated = true;
 			}
+		
+			if(!canMoveForward()){
+				delay(4000); // wait for passing robot
+				if(!canMoveForward()){
+					if(!rotateToFreeDirection()) 
+						return false; // panic state
+				}
+			}	
+
+
 			motion.moveForward(speed);
 		}
 	}
@@ -272,7 +293,7 @@ bool Robot::changePosition(){
 	return true;
 }
 
-
+// if it fails, you have to redo a scan of eggs
 bool Robot::reachEgg() {
 	double oldDistanceBottom = highDistanceBottom.distance();
 	double newDistanceBottom = oldDistanceBottom;
@@ -320,15 +341,30 @@ bool Robot::reachEgg() {
 	// motion.stop();
 	// position.update();
 
+	unsigned long startTime = millis();
 	motion.moveForward(cruiseSpeed);
+	position.update();
 	while (distanceProximity > 13) {
-		delay(100);
+		startTime = millis();
+		position.update();
+		while (millis() - startTime < 100)
+			position.update();
 		motion.stop();
 		delay(20);
+
+		if (highDistanceTop.distance() < 20) // some obstacles
+			return false;
+
+		distanceProximity = proximity.distance(); // update proximity measures
+		if(distanceProximity < 13) 
+			break;
+
 		newDistanceBottom = highDistanceBottom.distance();
 		if (newDistanceBottom > 60) {
 			bool result = tryToRefindEggFromDistance();
 			if (result == true) {
+				position.getOrientation();
+				position.clearMouseBuffer();
 				motion.moveForward(cruiseSpeed);
 				Serial.println("Refound");
 				continue;
@@ -468,24 +504,6 @@ int Robot::tryToApproach() {
 	
 	motion.moveForward(speed);
 	while(distanceNew > radius){
-		if(!canMoveForward()){
-			Serial.println("Can not move forward");
-			motion.stop();
-			position.update();
-			delay(4000);
-			if(canMoveForward()){
-				motion.moveForward(speed);
-				continue;
-			}
-			
-			if(!changePosition())
-				return APPROACH_FAILED; //panic state
-			position.update();
-			distanceOld = distanceNew;
-			distanceNew = sqrt(square(position.getX()) + square(position.getY()));
-			vectorPositionAngle = atan2(position.getY(), position.getX());
-			angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
-		}
 		position.update();
 		if (distanceNew < 3*radius)
 			speed = map(distanceNew, 0, 3 * radius, 0, cruiseSpeed);
@@ -529,6 +547,25 @@ int Robot::tryToApproach() {
 			delay(10);
 			position.update();
 			adjustOrientation(angleToFollow);
+			
+			if(!canMoveForward()){
+				Serial.println("Can not move forward");
+				motion.stop();
+				delay(4000);
+				if(canMoveForward()){
+					motion.moveForward(speed);
+					continue;
+				}
+			
+				if(!changePosition())
+					return APPROACH_FAILED; //panic state
+				position.update();
+				distanceOld = distanceNew;
+				distanceNew = sqrt(square(position.getX()) + square(position.getY()));
+				vectorPositionAngle = atan2(position.getY(), position.getX());
+				angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
+		}
+
 			NewDistanceLimit = NewDistanceLimit - DISTANCE_FOR_ADJUSTING_ANGLE;
 			if( distanceNew <= 3 * radius )
 				speed = speed / 2;
@@ -718,21 +755,30 @@ bool Robot::escapeFromPanic() {
 		if (command == NORMAL_STRATEGY) {
 			motion.stop();
 			state = EXPLORE_SCAN;
-		} else if (command == REMOTE_ROTATELEFT) {
+		} else if (command == SEARCH_LINE_STRATEGY) {
+			motion.stop();
+			state = COMEBACK_LINESEARCHING;
+		}else if (command == REMOTE_ROTATELEFT) {
 			motion.stop();
 			rotateLeft(2*TOLERANCE_ANGLE);
+			position.getOrientation();
 		} else if (command == REMOTE_ROTATERIGHT) {
 			motion.stop();
 			rotateRight(2*TOLERANCE_ANGLE);
+			position.getOrientation();
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
+			unsigned long startTime = millis();
 			motion.moveForward(cruiseSpeed);
-			delay(100);
+			while( millis() - startTime < 100)
+				position.update();
 			motion.stop();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
+			unsigned long startTime = millis();
 			motion.moveBackward(cruiseSpeed);
-			delay(100);
+			while( millis() - startTime < 100)
+				position.update();
 			motion.stop();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
@@ -781,7 +827,7 @@ void Robot::enterPanicState(){
 bool Robot::rotateToFreeDirection(){
 	if(canMoveForward()) 
 		return true;
-	double distance = 100; // distance of obstacles
+	double distance = 80; // distance of obstacles
 	int speed = rotationalCruiseSpeed;
 
 	// cycles eventually decreasing distance of obstacles
@@ -793,6 +839,7 @@ bool Robot::rotateToFreeDirection(){
 		double currentOrientation = startAngle;
 
 		bool switchRotation = false;
+		int randNumber = random(2); // random number between 0 and 1;
 		motion.rotateLeft(rotationalCruiseSpeed); // 10% speed
 		while (highDistanceTop.distance() < distance && 
 					(arriveAngle >= 0 ? 
@@ -800,17 +847,17 @@ bool Robot::rotateToFreeDirection(){
 						(currentOrientation < arriveAngleMod && currentOrientation > startAngle))){	
 			
 			
-			if (isOnBlackLine()){
-				motion.stop();
-				position.clearMouseBuffer();
-				if(!switchRotation){
-					switchRotation = true;
-					startTime = millis();
-					motion.rotateRight(rotationalCruiseSpeed);
-				}else{
-					break;
-				}
-			}
+			//if (isOnBlackLine()){
+			//	motion.stop();
+			//	position.clearMouseBuffer();
+			//	if(!switchRotation){
+			//		switchRotation = true;
+			//		startTime = millis();
+			//		motion.rotateRight(rotationalCruiseSpeed);
+			//	}else{
+			//		break;
+			//	}
+			//}
 			
 			if ( millis() - startTime > TIME_OUT ){
 				if(switchRotation){	
@@ -844,6 +891,7 @@ bool Robot::rotateToFreeDirection(){
 	
 }
 	
+// It doesn't need anymore
 bool Robot::isOnBlackLine(){
 	//test
 	return false;
@@ -898,8 +946,8 @@ bool Robot::rotateRight(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (isOnBlackLine())
-			return rotateLeft(angleRad);
+		//if (isOnBlackLine())
+		//	return rotateLeft(angleRad);
 		checkSpeedChange();
 	}
 	motion.stop();
@@ -952,8 +1000,8 @@ bool Robot::rotateLeft(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (isOnBlackLine())
-			return rotateRight(angleRad);
+		//if (isOnBlackLine())
+		//	return rotateRight(angleRad);
 		checkSpeedChange();
 	}
 	motion.stop();
@@ -964,8 +1012,7 @@ bool Robot::rotateLeft(double angleRad){
 }
 
 bool Robot::canMoveForward() {
-	//return highDistanceTop.distance() > 25;
-	return true;
+	return highDistanceTop.distance() > 25;
 }
 
 bool Robot::moveBackward(double distanceToDo){
@@ -1025,19 +1072,19 @@ bool Robot::tryToRefindEgg(){
 
 	rotateLeft(deltaAngleRad);
 	//Serial.println("end rotation");
-	if (proximity.distance() < 30)
+	if (proximity.distance() < 15)
 		return true;
 	rotateLeft(deltaAngleRad);
 	//Serial.println("end rotation");
-	if (proximity.distance() < 30)
+	if (proximity.distance() < 15)
 		return true;
 	rotateRight(3 * deltaAngleRad);
 	//Serial.println("end rotation");
-	if (proximity.distance() < 30)
+	if (proximity.distance() < 15)
 		return true;
 	rotateRight(deltaAngleRad);
 	//Serial.println("end rotation");
-	if (proximity.distance() < 30)
+	if (proximity.distance() < 15)
 		return true;
 	return false;
 }
@@ -1149,3 +1196,59 @@ void Robot::checkSpeedChange() {
 			rotationalCruiseSpeed -= 5;
 	}
 }
+
+
+
+// method that doesn't use mouse
+
+bool Robot::comeBackHomeSimple(){
+	double currentOrientation = position.getOrientation();
+	rotateToAngle(3/2*PI);
+	motion.moveForward(CRUISE_SPEED);
+	
+	while(!isOnBlueLine()){
+		if( highDistanceTop.distance() < 20){
+			motion.stop();
+			bool result = changePositionSimple();
+			if ( result == true){
+				currentOrientation = position.getOrientation();
+				if( currentOrientation > 0 && currentOrientation < 3/4*PI){
+					rotateToAngle(PI);
+					if(changePositionSimple() == false)
+						return false;
+				}
+				rotateToAngle(3/2*PI);
+				motion.moveForward(CRUISE_SPEED);
+				continue;
+			}else	
+				return false; // panic state
+		}
+	}
+}
+
+bool Robot::changePositionSimple(){
+	Serial.println("enter change position simple");
+	if(!rotateToFreeDirection()){
+		enterPanicState();
+		return false;
+	}
+	motion.moveForward(CRUISE_SPEED);
+	delay(1000);
+	motion.stop();
+	return true;	
+}
+
+bool Robot::searchEggSimple(){
+	double proximityDistance = proximity.distance();
+	while(proximityDistance < 10){
+		motion.moveForward(CRUISE_SPEED);
+		if(highDistanceTop.distance() < 20){
+			if(changePositionSimple() == false)
+				return false; //panic state
+		}
+
+		proximityDistance = proximity.distance();
+
+	}
+}
+
