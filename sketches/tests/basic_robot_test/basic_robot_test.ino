@@ -15,7 +15,7 @@
 #include <AFMotor.h>
 #include <RobotMotor.h>
 #include <EEPROM.h>
-
+#include <SoftwareServo.h>
 Robot robot;
 int state;
 int cruiseSpeed;
@@ -28,6 +28,8 @@ void setup() {
         //robot.recalibrate();
         delay(3000);
         robot.start();
+        delay(1000);
+        robot.catchEgg();
         delay(1000);
         Serial.println("init");
         robot.rotateRight(3*PI/4);

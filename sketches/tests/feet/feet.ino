@@ -1,5 +1,5 @@
 #include <Feet.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <Pins.h>
 
 Feet feet;

@@ -2,7 +2,7 @@
 #define Feet_h
 
 #include <Arduino.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <Pins.h>
 
 #define OPEN_ANGLE 45
@@ -21,10 +21,10 @@ public:
 	void trick();
 	
 private:
-	void write(Servo *servo, int angle, int speed);
+	//void write(Servo *servo, int angle, int speed);
 	bool areOpen;
-	Servo leftServo;
-	Servo rightServo;
+	SoftwareServo leftServo;
+	SoftwareServo rightServo;
 };
 
 #endif

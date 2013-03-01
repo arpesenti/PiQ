@@ -17,20 +17,25 @@ void Robot::init() {
 	lineSensor.init(false);
 	//remote.init();
 	position.calibrate(motion, false);
-	//feet.init();
+	feet.init();	
 	cruiseSpeed = CRUISE_SPEED;
 	rotationalCruiseSpeed = ROTATIONAL_CRUISE_SPEED;
 }
 
+int Robot::freeRam () {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
+
 void Robot::start(){
 	position.init();
-
 	// ********************************* no need to check obstacles and lines when exiting from home
 	int speed = CRUISE_SPEED/2; 
 
 	double distance = 0; // made distance cm
 	double NewDistanceLimit = 10; // cm
-	double distanceToCover = 40;
+	double distanceToCover = 10;
 	
 	position.update();
 	double angleToFollow = position.getOrientation();
@@ -45,7 +50,7 @@ void Robot::start(){
 	// Serial.println("Before while");
 	while (abs(distance) < distanceToCover){
 		// Serial.println("Entered while");
-
+		SoftwareServo::refresh();
 		position.update();
 		// check time out
 		elapsedTime = millis() - startTime;
@@ -439,10 +444,12 @@ bool Robot::catchEgg() {
 	// 	return false;
 	// }
 	feet.open();
-	Serial.println("Open feet");
-	delay(1000);
-	feet.close();
-	Serial.println("Close feet");
+	// Serial.println("Open feet");
+	// SoftwareServo::refresh();
+	// delay(1000);
+	// feet.close();
+	// Serial.println("Close feet");
+	SoftwareServo::refresh();
 }
 
 

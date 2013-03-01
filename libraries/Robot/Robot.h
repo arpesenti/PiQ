@@ -42,9 +42,9 @@
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 70
-#define CRUISE_SPEED 70
-#define ROTATIONAL_CRUISE_SPEED 60
+#define ACCELERATION_SPEED 50
+#define CRUISE_SPEED 50
+#define ROTATIONAL_CRUISE_SPEED 40
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
@@ -101,6 +101,7 @@ private:
 	void checkSpeedChange();
 	bool refindBlueLine();
 	bool tryToRefindEggFromDistance();
+	int freeRam();
 
 };
 
