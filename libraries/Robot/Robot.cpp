@@ -37,7 +37,7 @@ void Robot::start(){
 
 	double distance = 0; // made distance cm
 	double NewDistanceLimit = 10; // cm
-	double distanceToCover = 20;
+	double distanceToCover = 30;
 	
 	position.update();
 	double angleToFollow = position.getOrientation();
@@ -45,63 +45,66 @@ void Robot::start(){
 	unsigned long startTime = millis();
 	unsigned long elapsedTime = 0;
 	
-	bool decelerated = false;
+	//bool decelerated = false;
 	
 	motion.moveForward(speed);
 	
 	// Serial.println("Before while");
 	while (abs(distance) < distanceToCover){
 		// Serial.println("Entered while");
-		Serial.print("elapsedTime : ");
-		Serial.println(elapsedTime);
+		//Serial.print("elapsedTime : ");
+		//Serial.println(elapsedTime);
+		position.update();		
 		SoftwareServo::refresh();
 		position.update();
+		
 		// check time out
 		elapsedTime = millis() - startTime;
 		position.update();
 		if (elapsedTime  >  TASK_TIME_OUT){
 			motion.stop();
 			position.update();
-			enterPanicState();
+			Serial.println("TASK_TIME_OUT of start");
+			enterPanicState(); // panic or simply stop?
 			break;
 		}
+
+
 		//*position.update();
 		// check angle
-		// if ( distance > NewDistanceLimit){
-		// 	// Serial.println("New distance limit");
-		// 	motion.stop();
-		// 	position.update();
-		// 	adjustOrientation(angleToFollow); // follow initial angle
-		// 	position.getOrientation(); // update actual angle to compute exact coordinates
-		// 	//position.update();
-		// 	NewDistanceLimit = NewDistanceLimit + DISTANCE_FOR_ADJUSTING_ANGLE;
-		// 	//position.update();
+		 if ( distance > NewDistanceLimit){
+		// Serial.println("New distance limit");
+		 	motion.stop();
+		 	position.update();
+		 	adjustOrientation(angleToFollow); // follow initial angle
+		 	position.getOrientation(); // update actual angle to compute exact coordinates
+		 	NewDistanceLimit = NewDistanceLimit + DISTANCE_FOR_ADJUSTING_ANGLE;
+		 	
 		// 	if(!decelerated && distanceToCover - distance <= DECELERATING_DISTANCE){
 		// 		speed = speed / 2;
 		// 		decelerated = true;
 		// 	}
 		// 	//position.update();
-		// 	motion.moveForward(speed);
-		// }
+			motion.moveForward(speed);
+		 }
 
-		//*position.update();
+		position.update();
 		distance = position.getY() / MOUSE_SCALE; // it moves with orientation PI/2
 		//*position.update();
-		Serial.println(position.getX());
+		//Serial.println(position.getX());
 		//*position.update();
-  	Serial.println(position.getY());
+  	//Serial.println(position.getY());
   	//*position.update();
 		
 	}
 	Serial.println("Exit while of start");
 	motion.stop();
 	position.update();
-	position.reset(); // da rimettere!!!!
+	position.reset(); 
 	Serial.println(position.getX());
   Serial.println(position.getY());
   Serial.println(position.getOrientation());
-	//*******************************
-
+	
 }
 
 bool Robot::adjustOrientation(double angleToFollow){
