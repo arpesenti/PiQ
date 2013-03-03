@@ -16,10 +16,10 @@ void setup(){
 void loop(){
   Serial.println("");
   Serial.print("Proximity  ");
-  Serial.println(prox.distance());
-  Serial.print("Top        ");
-  Serial.println(highTop.distance());
-  Serial.print("Bottom     ");
+  Serial.print(prox.distance());
+  Serial.print("      Top  ");
+  Serial.print(highTop.distance());
+  Serial.print("    Bottom ");
   Serial.println(highBottom.distance());
   delay(500);
 }

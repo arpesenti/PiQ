@@ -37,7 +37,7 @@ void Robot::start(){
 
 	double distance = 0; // made distance cm
 	double NewDistanceLimit = 10; // cm
-	double distanceToCover = 10;
+	double distanceToCover = 20;
 	
 	position.update();
 	double angleToFollow = position.getOrientation();
@@ -52,16 +52,20 @@ void Robot::start(){
 	// Serial.println("Before while");
 	while (abs(distance) < distanceToCover){
 		// Serial.println("Entered while");
+		Serial.print("elapsedTime : ");
+		Serial.println(elapsedTime);
 		SoftwareServo::refresh();
 		position.update();
 		// check time out
 		elapsedTime = millis() - startTime;
 		position.update();
-		if (elapsedTime  >  SHORT_TIME_OUT){
+		if (elapsedTime  >  TASK_TIME_OUT){
+			motion.stop();
+			position.update();
 			enterPanicState();
 			break;
 		}
-		position.update();
+		//*position.update();
 		// check angle
 		// if ( distance > NewDistanceLimit){
 		// 	// Serial.println("New distance limit");
@@ -80,16 +84,16 @@ void Robot::start(){
 		// 	motion.moveForward(speed);
 		// }
 
-		position.update();
+		//*position.update();
 		distance = position.getY() / MOUSE_SCALE; // it moves with orientation PI/2
-		position.update();
+		//*position.update();
 		Serial.println(position.getX());
-		position.update();
+		//*position.update();
   	Serial.println(position.getY());
-  	position.update();
+  	//*position.update();
 		
 	}
-	Serial.println("Exit while");
+	Serial.println("Exit while of start");
 	motion.stop();
 	position.update();
 	position.reset(); // da rimettere!!!!

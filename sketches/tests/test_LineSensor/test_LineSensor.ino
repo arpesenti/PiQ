@@ -16,7 +16,7 @@ void loop(){
   Serial.println(lineSensor.rightReflectance());
   Serial.println(lineSensor.centerReflectance());
   Serial.println(lineSensor.color());
-  Serial.println(" ");
+  Serial.println("");
   delay(1000);
   
 }

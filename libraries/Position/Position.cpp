@@ -17,6 +17,7 @@ bool Position::init() {
 	readCal(); // TODO: check if calibration is already in EEPROM. If not initialize xMax,.. to 0
 	relativeAngle = updateAngle();
 	northAngle = fmod(PI_TIMES_2 + PI/2 - relativeAngle, PI_TIMES_2);
+	alpha = PI/2;
   //	Serial.println(northAngle);
   //	Serial.println(relativeAngle);
 	Serial.println("end of initialization of Position"); 
@@ -41,6 +42,7 @@ double Position::getOrientation() {
 
 // just update coordinates
 void Position::update() {
+	noInterrupts(); // Disabling interrupts
 	mouse.write(0xeb); // ask data
 	mouse.read(); // ignore acknowledgement 
 	mouse.read(); // mstat
@@ -52,8 +54,11 @@ void Position::update() {
 	// Serial.print((int)dy);
 	// Serial.print("    ");
 	
+	interrupts(); // Enabling interrupts
 	x = x + cos(alpha)*dy + sin(alpha)*dx;
 	y = y + sin(alpha)*dy - cos(alpha)*dx;
+	
+	
 }
 
 void Position::reset() {
