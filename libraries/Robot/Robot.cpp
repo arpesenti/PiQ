@@ -34,7 +34,7 @@ int Robot::freeRam () {
 void Robot::start(){
 	position.init();
 	// ********************************* no need to check obstacles and lines when exiting from home
-	int speed = CRUISE_SPEED/2; 
+	int speed = cruiseSpeed/2; 
 
 	double distance = 0; // made distance cm
 	double NewDistanceLimit = 10; // cm
@@ -66,7 +66,7 @@ void Robot::start(){
 			motion.stop();
 			position.update();
 			Serial.println("TASK_TIME_OUT of start");
-			enterPanicState(); // panic or simply stop?
+			enterPanicState(); // panic or simply stop?***************************************
 			break;
 		}
 
@@ -142,15 +142,16 @@ bool Robot::scanForEgg() {
 
 	unsigned long startTime = millis();
 	motion.rotateLeft(rotationalCruiseSpeed);
-	while (! areCloseAngles(currentOrientation, arriveAngle, TOLERANCE_ANGLE) ){
+	while (! areCloseAngles(currentOrientation, arriveAngleMod, TOLERANCE_ANGLE) ){
 		distanceBottom = highDistanceBottom.distance();
+		Serial.print("distanceBottom : ");		
 		Serial.println(distanceBottom);
 		if(distanceBottom < 60){
 			motion.stop();
-			Serial.println("Entered in <80");
+			Serial.println("Entered in < 60");
 			double distanceTop = highDistanceTop.distance();
 			if(distanceTop - distanceBottom > DISTANCE_MARGIN){
-				// Serial.println("Entered in found");
+				Serial.println("Entered in found");
 				// Serial.print("Bottom: ");
 				// Serial.print(distanceBottom);
 				// Serial.print(" Top: ");
@@ -160,37 +161,48 @@ bool Robot::scanForEgg() {
 				Serial.print("Bottom: ");
 				Serial.println(highDistanceBottom.distance());
 				distanceBottom = highDistanceBottom.distance();
-				while (distanceBottom > 60 && millis() - startTime < TIME_OUT) {
-					rotateRight(TOLERANCE_ANGLE+0.01);
+				while (distanceBottom > 60 && millis() - startTime < SHORT_TIME_OUT) {
+					rotateRight(TOLERANCE_ANGLE + 0.01);
 					delay(100);
 					distanceBottom = highDistanceBottom.distance();
 				}
-				if(millis() - startTime > TIME_OUT){
+			
+				// exit for time out
+				if(millis() - startTime > SHORT_TIME_OUT){
 					motion.stop();
 					Serial.println("Entered in timeout");
 					enterPanicState();
 					return false;
 				}
+
+				distanceTop = highDistanceTop.distance();
+				if(proximity.distance() < 10 || distanceTop < distanceBottom + DISTANCE_MARGIN){
+					Serial.print("probably fake measures : proximity distance ");
+					Serial.println(proximity.distance());
+					Serial.print("probably fake measures : distanceTop distance ");
+					Serial.println(distanceTop);
+					// probably bottom measures are not correct
+					motion.rotateLeft(rotationalCruiseSpeed);
+					delay(300);
+					continue;
+
+				}
+					
 				return true;
 			} else {
-				Serial.println("Egg covered");
+				Serial.println("Egg covered or obstacle");
 				motion.rotateLeft(rotationalCruiseSpeed);
-				delay(10);
+				delay(100);
 			}
 		}
 
-		if ( millis() - startTime > TIME_OUT){
+		if ( millis() - startTime > SHORT_TIME_OUT){
 			motion.stop();
 			Serial.println("Entered in timeout");
 			enterPanicState();
 			break;
 		}
 
-		//if( isOnBlackLine()){
-		//	motion.stop();
-		//	rotateRight(PI/2);
-		//	return false;
-		//}
 		currentOrientation = position.getOrientation();
 		checkSpeedChange();
 	}
