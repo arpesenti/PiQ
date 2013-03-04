@@ -26,9 +26,10 @@ int rotationalCruiseSpeed;
 void setup() {
         Serial.begin(9600);
         Wire.begin();
-	state = EXPLORE_REACHEGG;
+	state = WAIT;
 	robot.init();
-        delay(3000);
+        pinMode(13, OUTPUT);
+        digitalWrite(13, LOW);
         Serial.println("init");
 }
 
@@ -38,6 +39,9 @@ void loop() {
     case WAIT: 
       Serial.println("----- WAIT -----");
       robot.escapeFromWait();
+      delay(1000);
+      robot.changePosition();
+      digitalWrite(13, HIGH);
       break;
       
     case EXPLORE_SCAN:

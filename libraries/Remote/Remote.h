@@ -5,11 +5,9 @@
 #include <IRremote.h>
 #include <Pins.h>
 
-#define WAIT_STRATEGY_BUTTON 284151855 // button off
-#define WAIT_STRATEGY '0'
-#define NORMAL_STRATEGY_BUTTON 284131965 // button 1
+#define NORMAL_STRATEGY_BUTTON 0x10EF827D // button 1
 #define NORMAL_STRATEGY '1'
-#define PANIC_STRATEGY_BUTTON 284136045 // button 2
+#define PANIC_STRATEGY_BUTTON 0x10EFD02F // power button
 #define PANIC_STRATEGY '2'
 #define REMOTE_ROTATELEFT_BUTTON 0x10EF40BF // left (vol -)
 #define REMOTE_ROTATELEFT '3'

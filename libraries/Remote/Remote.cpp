@@ -1,7 +1,7 @@
 #include "Remote.h"
 
 Remote::Remote(): receiver(IR_PIN) {
-	currentStrategy = WAIT_STRATEGY;
+	currentStrategy = REMOTE_NO_STRATEGY;
 }
 
 void Remote::init() {
@@ -13,8 +13,6 @@ void Remote::update() {
 		if (results.value == NORMAL_STRATEGY_BUTTON)
 		{
 			currentStrategy = NORMAL_STRATEGY;
-		} else if (results.value == WAIT_STRATEGY_BUTTON) {
-			currentStrategy = WAIT_STRATEGY;
 		} else if (results.value == PANIC_STRATEGY_BUTTON) {
 			currentStrategy = PANIC_STRATEGY;
 		} else if (results.value == REMOTE_ROTATELEFT_BUTTON) {
