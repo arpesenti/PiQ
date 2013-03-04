@@ -141,6 +141,8 @@ bool Robot::scanForEgg() {
 	double currentOrientation = position.getOrientation();
 
 	unsigned long startTime = millis();
+	unsigned long taskStartTime;
+
 	motion.rotateLeft(rotationalCruiseSpeed);
 	while (! areCloseAngles(currentOrientation, arriveAngleMod, TOLERANCE_ANGLE) ){
 		distanceBottom = highDistanceBottom.distance();
@@ -161,18 +163,22 @@ bool Robot::scanForEgg() {
 				Serial.print("Bottom: ");
 				Serial.println(highDistanceBottom.distance());
 				distanceBottom = highDistanceBottom.distance();
-				while (distanceBottom > 60 && millis() - startTime < SHORT_TIME_OUT) {
-					rotateRight(TOLERANCE_ANGLE + 0.01);
+				taskStartTime = millis();
+				while (distanceBottom > 60 && millis() - taskStartTime < TASK_TIME_OUT) {
+					rotateRight(2*TOLERANCE_ANGLE);
 					delay(100);
 					distanceBottom = highDistanceBottom.distance();
 				}
 			
+				feet.open();
+
 				// exit for time out
-				if(millis() - startTime > SHORT_TIME_OUT){
+				if(millis() - taskStartTime > TASK_TIME_OUT){
 					motion.stop();
-					Serial.println("Entered in timeout");
-					enterPanicState();
-					return false;
+					Serial.println("Entered in task - timeout");
+					motion.rotateLeft(rotationalCruiseSpeed);
+					delay(100);
+					continue;
 				}
 
 				distanceTop = highDistanceTop.distance();
@@ -184,11 +190,13 @@ bool Robot::scanForEgg() {
 					// probably bottom measures are not correct
 					motion.rotateLeft(rotationalCruiseSpeed);
 					delay(300);
+					
 					continue;
 
 				}
-					
+				
 				return true;
+			
 			} else {
 				Serial.println("Egg covered or obstacle");
 				motion.rotateLeft(rotationalCruiseSpeed);
@@ -206,7 +214,10 @@ bool Robot::scanForEgg() {
 		currentOrientation = position.getOrientation();
 		checkSpeedChange();
 	}
+
+	Serial.println("completed rotation for scan - no eggs found");
 	motion.stop();
+	feet.open();	
 	return false;
 	
 } 
@@ -226,6 +237,9 @@ bool Robot::changePosition(){
 	
 	//bool decelerated = false;
 
+	unsigned long startTime = millis();
+	unsigned long taskStartTime = millis();
+
 	int speed = cruiseSpeed;
 	
 	if(!rotateToFreeDirection()) 
@@ -236,7 +250,7 @@ bool Robot::changePosition(){
 	Serial.println(initialOrientation);
 
 	motion.moveForward(speed);
-	while (distance < distanceToCover){
+	while (distance < distanceToCover && millis() - startTime < SHORT_TIME_OUT){
 		// check obstacles - DO IT ONLY WHEN YOU STOP TO UPDATE ANGLE
 		
 		// update made distance
@@ -254,7 +268,8 @@ bool Robot::changePosition(){
 		position.update();
 		
 		// update angle
-		if ( distance > NewDistanceLimit){
+		if ( distance > NewDistanceLimit || millis() - taskStartTime > TASK_TIME_OUT/2){
+			Serial.println("check Point");
 			motion.stop();
 			position.update();
 			delay(100);
@@ -263,7 +278,7 @@ bool Robot::changePosition(){
 			position.getOrientation();
 			NewDistanceLimit = NewDistanceLimit + DISTANCE_FOR_ADJUSTING_ANGLE;
 			position.clearMouseBuffer();
-			
+						
 	
 			//if(!decelerated && distanceToCover - distance <= DECELERATING_DISTANCE){
 			//	speed = speed / 2;
@@ -277,19 +292,27 @@ bool Robot::changePosition(){
 						return false; // panic state
 				}
 			}	
-
-
+			
+			feet.open();
+			taskStartTime = millis();
 			motion.moveForward(speed);
 		}
 	}
-	
+
+
 	motion.stop();
 	position.update();
 
+
+	if ( millis() - startTime > SHORT_TIME_OUT){
+		Serial.println("exit for timeout in change position");
+	}
+	
 	Serial.println("position changed: x, y, currentangle" );
 	Serial.println(position.getX());
 	Serial.println(position.getY());
 	Serial.println(position.getOrientation());
+	feet.open();
 	return true;
 }
 
@@ -847,26 +870,36 @@ void Robot::enterPanicState(){
 }
 
 bool Robot::rotateToFreeDirection(){
+	Serial.println("enter rotateToFreeDirection");
+
 	if(canMoveForward()) 
 		return true;
-	double distance = 80; // distance of obstacles
+	double distance = 60; // distance of obstacles
 	int speed = rotationalCruiseSpeed;
 
 	// cycles eventually decreasing distance of obstacles
-	while( distance > 10){
+	while( distance >= 20){
 		unsigned long startTime = millis();
 		double startAngle = position.getOrientation();
-		double arriveAngle = startAngle - TOLERANCE_ANGLE;
-		double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
+		double arriveAngle = fmod(2*PI + (startAngle - 3*TOLERANCE_ANGLE), 2*PI);
 		double currentOrientation = startAngle;
 
 		bool switchRotation = false;
 		motion.rotateLeft(rotationalCruiseSpeed); // 10% speed
-		while (highDistanceTop.distance() < distance && 
-					(arriveAngle >= 0 ? 
-						(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
-						(currentOrientation < arriveAngleMod && currentOrientation > startAngle))){	
+		delay(100);
+
+		Serial.print("try with distance : ");
+		Serial.println(distance);
+
+		
+		Serial.print("high dist. top");
+		Serial.println(highDistanceTop.distance());
+		Serial.println(arriveAngle);
+
+		while ((highDistanceTop.distance() < distance || !canMoveForward()) && 
+					 !areCloseAngles(startAngle, arriveAngle, 2*TOLERANCE_ANGLE)){	
 			
+			//Serial.println("iteration of while");
 			
 			//if (isOnBlackLine()){
 			//	motion.stop();
@@ -883,13 +916,15 @@ bool Robot::rotateToFreeDirection(){
 			if ( millis() - startTime > SHORT_TIME_OUT ){
 				if(switchRotation){	
 					motion.stop();	
-					position.clearMouseBuffer();	
+					position.clearMouseBuffer();
+					Serial.println("time out rotate to free direction");	
 					enterPanicState();
 					return false;
 				}else{
 					switchRotation = true;
 					startTime = millis();
 					motion.rotateRight(rotationalCruiseSpeed);
+					delay(100);
 				}
 			}
 			currentOrientation = position.getOrientation();
@@ -903,6 +938,7 @@ bool Robot::rotateToFreeDirection(){
 
 		// exit the while loop for the first condition
 		if (highDistanceTop.distance() >= distance && canMoveForward()){
+			Serial.println("direction found");
 			return true;
 		}
 		
