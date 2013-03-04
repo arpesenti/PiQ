@@ -23,10 +23,10 @@ void loop() {
   Serial.print(position.getX());
    position.update();
   Serial.print("   Y: ");
-  Serial.println(position.getY());
+  Serial.print(position.getY());
    position.update();
-  //Serial.print("   orientation: ");
-  //Serial.print(position.getOrientation()); 
+  Serial.print("   orientation: ");
+  Serial.println(position.getOrientation()); 
   // position.update();
   //Serial.print("     ");
   //Serial.println(sqrt(square(position.getX()) + square(position.getY())));

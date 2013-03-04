@@ -164,16 +164,19 @@ bool Robot::scanForEgg() {
 				Serial.println(highDistanceBottom.distance());
 				distanceBottom = highDistanceBottom.distance();
 				taskStartTime = millis();
-				while (distanceBottom > 60 && millis() - taskStartTime < TASK_TIME_OUT) {
-					rotateRight(2*TOLERANCE_ANGLE);
-					delay(100);
+				while (distanceBottom > 60 && millis() - taskStartTime < TASK_TIME_OUT/2) {
+					//rotateRight(2*TOLERANCE_ANGLE);
+					motion.rotateRight(rotationalCruiseSpeed);				
+					delay(10);
 					distanceBottom = highDistanceBottom.distance();
+					Serial.println("go to right to research egg");
 				}
+				motion.stop();
 			
 				feet.open();
 
 				// exit for time out
-				if(millis() - taskStartTime > TASK_TIME_OUT){
+				if(millis() - taskStartTime > TASK_TIME_OUT/2){
 					motion.stop();
 					Serial.println("Entered in task - timeout");
 					motion.rotateLeft(rotationalCruiseSpeed);
@@ -330,82 +333,59 @@ bool Robot::reachEgg() {
 	Serial.println(newDistanceBottom);
 	Serial.print("Proximity: ");
 	Serial.println(distanceProximity);
-	// if (newDistanceBottom > 15 && distanceProximity > 15){
-	// 	motion.moveForward(cruiseSpeed);		
-	// 	while(newDistanceBottom > 15){
-	// 		position.update();
-	// 		if(newDistanceBottom - oldDistanceBottom > 20){ // give a bit of tolerance on measurement errors
-	// 			motion.stop();
-	// 			position.update();
-	// 			return false;
-	// 		}
-	// 		oldDistanceBottom = newDistanceBottom;
-	// 		position.update();
-	// 		newDistanceBottom = highDistanceBottom.distance();
-	// 		position.update();
-
-	// 		// check for robot and obstacles
-	// 		double distanceTop = highDistanceTop.distance();
-	// 		position.update();
-
-	// 		if(distanceTop - newDistanceBottom < DISTANCE_MARGIN){
-	// 			motion.stop();
-	// 			position.update();
-	// 			if(!waitForPassingRobot){
-	// 				waitForPassingRobot = true;
-	// 				delay(3000);
-	// 				continue;
-	// 			}else
-	// 				return false;
-	// 		}
-	// 	}
-	// }
-	// position.update();
-	// motion.stop();
-	// position.update();
+	
 
 	unsigned long startTime = millis();
+	unsigned long taskStartTime;
 	motion.moveForward(cruiseSpeed);
 	position.update();
-	while (distanceProximity > 13) {
-		startTime = millis();
+	while (distanceProximity > 13 && millis() - startTime < SHORT_TIME_OUT/2) {
+		taskStartTime = millis();		
 		position.update();
-		while (millis() - startTime < 500)
+		while (millis() - taskStartTime < m100_TIME_OUT){
 			position.update();
+			distanceProximity = proximity.distance();
+			position.update();
+			//Serial.print("Distance proximity");
+			//Serial.println(distanceProximity);
+			//position.update();
+			if(distanceProximity < 13)
+				break;
+		}
 		motion.stop();
 		position.update();
 		delay(20);
 
-		if (highDistanceTop.distance() < 20) // some obstacles
-			return false;
+		if (highDistanceTop.distance() < 20){ // some obstacles
+			Serial.println("some obstacles in trying to reach egg");
+			delay(4000); // waiting for passing robot
+			if (highDistanceTop.distance() < 20)			
+				return false;
+		}
 
 		distanceProximity = proximity.distance(); // update proximity measures
 		Serial.print("Distance proximity");
 		Serial.println(distanceProximity);
-		if(distanceProximity < 13) 
+		if(distanceProximity < 13){
+			Serial.println("exit from 1st step of reach egg < 13");			
 			break;
+		}
 		if (!tryToRefindEggFromDistance())
 			return false;
 		motion.moveForward(cruiseSpeed);
-		// newDistanceBottom = highDistanceBottom.distance();
-		// if (newDistanceBottom > 60) {
-		// 	bool result = tryToRefindEggFromDistance();
-		// 	if (result == true) {
-		// 		position.getOrientation();
-		// 		position.clearMouseBuffer();
-		// 		motion.moveForward(cruiseSpeed);
-		// 		Serial.println("Refound");
-		// 		continue;
-		// 	} else {
-		// 		Serial.println("Not Refound");
-		// 		return false;
-		// 	}
-		// }
 
 	}
 	motion.stop();
 	position.update();
-	Serial.println("Exit <13");
+	feet.open();
+	
+	// check if exit for time our
+	if(millis() - startTime > SHORT_TIME_OUT/2){
+		Serial.println("exit for time out in 1st step of try to reach egg");		
+		return false;
+	}
+
+	Serial.println("Exit < 13");
 	delay(1000);
 	double oldProx= proximity.distance();
 	double newProx = oldProx;
@@ -414,48 +394,56 @@ bool Robot::reachEgg() {
 	Serial.println(newProx);
 	
 
-	motion.moveForward(cruiseSpeed);
+	
 	// 2nd step : get very close to egg
-	while(newProx > 4){
-		position.update();
 
-		if (newProx >= 15 && oldProx >= 15){
-			motion.stop();
-			delay(1000);
+	taskStartTime = millis();
+	startTime = millis();
+	motion.moveForward(cruiseSpeed/2);
+	position.update();
+
+	while(distanceProximity > 5 && millis() - startTime < SHORT_TIME_OUT/2){
+		taskStartTime = millis();
+		while (millis() - taskStartTime < m100_TIME_OUT/2){
 			position.update();
-			if(tryToRefindEgg() == false)
-				return false;			
-			else
-				motion.moveForward(cruiseSpeed/2);
-		}
-
-		position.update();
-
-		if(newProx > oldProx + 7){ // give a bit of tolerance on measurement errors
-			motion.stop();
-			delay(1000);
+			distanceProximity = proximity.distance();
 			position.update();
-			if(tryToRefindEgg() == false)
-				return false;
-			else
-				motion.moveForward(cruiseSpeed/2);
-						
+			Serial.print("Distance proximity");
+			Serial.println(distanceProximity);
+			position.update();
+			if(distanceProximity < 5){
+				motion.stop();
+				position.update();
+				Serial.println("egg reached - exit from 2nd step of reach egg");
+				return true;
+			}
 		}
-
+		motion.stop();
 		position.update();
-		oldProx = newProx;
-		position.update();
-		newProx = proximity.distance();		
-		//Serial.print("prox distance: ");	
-		//Serial.println(newProx);
+		delay(20);
+		if(!tryToRefindEgg()){
+			Serial.println("egg missed");
+			return false;
+		}
+		motion.moveForward(cruiseSpeed/2);
 
 	}
-	
+
 	motion.stop();
 	position.update();
-	return true;
 	
+	if(distanceProximity <= 5){
+		Serial.println("egg reached - exit from 2nd step of reach egg");
+		return true;
+	}
+
+	if (millis() - startTime > SHORT_TIME_OUT/2){
+		Serial.println("exit for time out of 2nd step of reach egg");
+		return false;
+	}
 }
+
+
 bool Robot::catchEgg() {
 	// PRECONDITION robot near the egg
 	
@@ -1126,79 +1114,64 @@ bool Robot::moveForwardKeepingDirection(double speed, double angleToKeep){
 
 bool Robot::tryToRefindEgg(){
 	Serial.println("enter in try to refind egg");
-	double deltaAngleRad = 3/2*TOLERANCE_ANGLE;
 
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (proximity.distance() < 15)
-		return true;
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	if (proximity.distance() < 15)
-		return true;
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (proximity.distance() < 15)
-		return true;
+	// consider time not angles when rotating
+
+	motion.rotateLeft(rotationalCruiseSpeed);
+	unsigned long startTime = millis();
+	
+	while(millis() - startTime < m100_TIME_OUT/2){
+		if (proximity.distance() < 15){
+			motion.stop();	
+			Serial.println("refound egg");
+			return true;
+		}
+	}
+	motion.stop();
+	
+	startTime = millis();
+	while(millis() - startTime <  m100_TIME_OUT){
+		if ( proximity.distance() < 15){
+			motion.stop();	
+			Serial.println("refound egg");
+			return true;
+		}
+	}
+	motion.stop();
+
+	Serial.println("egg not refound");	
 	return false;
-}
 
+}
+	
 bool Robot::tryToRefindEggFromDistance(){
 	Serial.println("enter in try to refind egg from distance");
-	double deltaAngleRad =  3/2*TOLERANCE_ANGLE;
-
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateLeft(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	rotateRight(deltaAngleRad);
-	delay(100);
-	//Serial.println("end rotation");
-	if (highDistanceBottom.distance() < 60 || proximity.distance() < 15)
-		return true;
-	return false;
+	// consider time not angles when rotating
 	
+	motion.rotateLeft(rotationalCruiseSpeed);
+	unsigned long startTime = millis();
+	
+	while(millis() - startTime < m100_TIME_OUT){
+		if (highDistanceBottom.distance() < 60 || proximity.distance() < 15){
+			motion.stop();	
+			Serial.println("refound egg");
+			return true;
+		}
+	}
+	motion.stop();
+	
+	startTime = millis();
+	while(millis() - startTime < 2 * m100_TIME_OUT){
+		if (highDistanceBottom.distance() < 60 || proximity.distance() < 15){
+			motion.stop();	
+			Serial.println("refound egg");
+			return true;
+		}
+	}
+	motion.stop();
+
+	Serial.println("egg not refound");	
+	return false;
 }
 
 

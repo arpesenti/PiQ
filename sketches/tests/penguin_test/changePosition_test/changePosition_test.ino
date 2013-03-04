@@ -29,11 +29,11 @@ void setup() {
   robot.init();
   Serial.println("Robot init finished ----------");
   delay(3000);
-  result = robot.scanForEgg();
+  result = robot.changePosition();
   if (result == true)
-    Serial.println("Egg found! -------------");
+    Serial.println("changed! -------------");
   else
-    Serial.println("Not found --------------"); 
+    Serial.println("Not changed! --------------"); 
   if (state == PANIC)
     Serial.println("------ PANIC -------");
 }
