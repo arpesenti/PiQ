@@ -224,7 +224,7 @@ bool Robot::changePosition(){
 	double deltaX = 0;
 	double deltaY = 0;
 	
-	bool decelerated = false;
+	//bool decelerated = false;
 
 	int speed = cruiseSpeed;
 	
@@ -237,33 +237,7 @@ bool Robot::changePosition(){
 
 	motion.moveForward(speed);
 	while (distance < distanceToCover){
-		// check black line - no more needed *** FIELD IS DELIMITED WITH WALLS
-		//if(isOnBlackLine()){
-		//	motion.stop();
-		//	position.update();
-		//	moveBackward(10 * MOUSE_SCALE); // distance to do backward
-		//	position.update();
-		//	if(!rotateRight(PI/2)) 
-		//		return false; // panic state	
-		//	motion.moveForward(speed);	
-			
-		//}
-		//position.update();
-
 		// check obstacles - DO IT ONLY WHEN YOU STOP TO UPDATE ANGLE
-		
-
-		//if(!canMoveForward()){
-		//	motion.stop();
-		//	position.update();
-		//	delay(4000); // wait for passing robot
-		//	if(!canMoveForward()){
-		//		if(!rotateToFreeDirection()) 
-		//			return false; // panic state
-		//	}
-		//	position.update();
-		//	motion.moveForward(speed);
-		//}
 		
 		// update made distance
 		position.update();
@@ -291,10 +265,10 @@ bool Robot::changePosition(){
 			position.clearMouseBuffer();
 			
 	
-			if(!decelerated && distanceToCover - distance <= DECELERATING_DISTANCE){
-				speed = speed / 2;
-				decelerated = true;
-			}
+			//if(!decelerated && distanceToCover - distance <= DECELERATING_DISTANCE){
+			//	speed = speed / 2;
+			//	decelerated = true;
+			//}
 		
 			if(!canMoveForward()){
 				delay(4000); // wait for passing robot
@@ -312,7 +286,7 @@ bool Robot::changePosition(){
 	motion.stop();
 	position.update();
 
-	Serial.println("position changed" );
+	Serial.println("position changed: x, y, currentangle" );
 	Serial.println(position.getX());
 	Serial.println(position.getY());
 	Serial.println(position.getOrientation());
