@@ -8,7 +8,7 @@
 #include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <IRremote.h>
 #include <ADJDS311.h>
 #include <Wire.h>

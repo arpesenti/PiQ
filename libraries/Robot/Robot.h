@@ -27,10 +27,11 @@
 
 #define MOUSE_SCALE 85
 #define TIME_OUT 30000
+#define LONG_TIME_OUT 45000
 #define SHORT_TIME_OUT 10000
 #define TASK_TIME_OUT 2500
 #define m500_TIME_OUT 500
-#define m100_TIME_OUT 500
+#define m100_TIME_OUT 100
 #define TOLERANCE_ANGLE 0.1
 #define DISTANCE_MARGIN 20
 #define ACCELERATION_TIME 50
@@ -45,9 +46,9 @@
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 30
-#define CRUISE_SPEED 5
-#define ROTATIONAL_CRUISE_SPEED 30
+#define ACCELERATION_SPEED 70
+#define CRUISE_SPEED 40
+#define ROTATIONAL_CRUISE_SPEED 75
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
@@ -94,7 +95,7 @@ private:
   	bool canMoveForward();
   
   	bool tryToRefindEgg();
-  	bool isOnBlackLine();
+  	bool isOnBlack();
 	bool moveForwardKeepingDirection(double speed, double orientation);
 	bool areCloseAngles(double angle1, double angle2, double tolerance);
 	double distanceBetweenAngles(double angle1, double angle2);

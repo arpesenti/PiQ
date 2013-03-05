@@ -15,7 +15,7 @@
 #define C_HIGH_THRESHOLD 602
 
 #define WINDOW_WIDTH 3
-#define ALPHA_FILTER 0.8
+#define ALPHA_FILTER 1.0
 
 class LineSensor {
 public:

@@ -8,7 +8,7 @@ LineSensor lineSensor;
 
 void setup(){
   Serial.begin(9600);
-  lineSensor.init(true);
+  lineSensor.init(false);
 }
 
 void loop(){
@@ -17,6 +17,6 @@ void loop(){
   Serial.println(lineSensor.centerReflectance());
   Serial.println(lineSensor.color());
   Serial.println("");
-  delay(1000);
+  //delay(1000);
   
 }

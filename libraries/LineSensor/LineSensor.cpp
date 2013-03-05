@@ -53,23 +53,27 @@ char LineSensor::color() {
 	// int greenValue = windowColorG[0];
 	// int blueValue = windowColorB[0];
 
-	Serial.print("Red: ");
-	Serial.print(redValue);
-	Serial.print(" Green: ");
-	Serial.print(greenValue);
-	Serial.print(" Blue: ");
-	Serial.println(blueValue);
+	// Serial.print("Red: ");
+	// Serial.print(redValue);
+	// Serial.print(" Green: ");
+	// Serial.print(greenValue);
+	// Serial.print(" Blue: ");
+	// Serial.println(blueValue);
 
 	previousValueColorR = redValue;
 	previousValueColorG = greenValue;
 	previousValueColorB = blueValue;
 
-	int Rlevel = level(redValue);
-	int Glevel = level(greenValue);
-	int Blevel = level(blueValue);
+	// int Rlevel = level(redValue);
+	// int Glevel = level(greenValue);
+	// int Blevel = level(blueValue);
 
-	if (Rlevel > 870 && Glevel > 800 && Blevel > 450 && Blevel < 700)
+	if (redValue > 1000 && greenValue > 750  && greenValue < 880 && blueValue > 480 && blueValue < 540)
 		return 'o';
+	else if (redValue < 550 && greenValue < 550 && blueValue < 550)
+		return 'k';
+	else 
+		return 'n';
 
 	// if (Rlevel == C_HIGH && Glevel == C_HIGH && Blevel == C_HIGH) // white
 	// 	return 'w';

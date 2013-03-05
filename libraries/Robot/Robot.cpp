@@ -86,11 +86,11 @@ void Robot::start(){
 
 		position.update();
 		distance = position.getY() / MOUSE_SCALE; // it moves with orientation PI/2
-		//*position.update();
-		//Serial.println(position.getX());
-		//*position.update();
-  	//Serial.println(position.getY());
-  	//*position.update();
+		position.update();
+		Serial.println(position.getX());
+		position.update();
+  	Serial.println(position.getY());
+  	position.update();
 		
 	}
 	Serial.println("Complete start correctly");
@@ -137,6 +137,8 @@ bool Robot::scanForEgg() {
 	double startAngle = position.getOrientation();
 	double arriveAngle = startAngle - 2 * TOLERANCE_ANGLE;
 	double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
+	Serial.println(startAngle);
+	Serial.println(arriveAngleMod);
 	double distanceBottom;
 	double currentOrientation = position.getOrientation();
 
@@ -166,8 +168,8 @@ bool Robot::scanForEgg() {
 				taskStartTime = millis();
 				while (distanceBottom > 60 && millis() - taskStartTime < TASK_TIME_OUT/2) {
 					//rotateRight(2*TOLERANCE_ANGLE);
-					motion.rotateRight(rotationalCruiseSpeed);				
-					delay(10);
+					motion.rotateRight(0.7*rotationalCruiseSpeed);				
+					//delay(10);
 					distanceBottom = highDistanceBottom.distance();
 					Serial.println("go to right to research egg");
 				}
@@ -215,6 +217,7 @@ bool Robot::scanForEgg() {
 		}
 
 		currentOrientation = position.getOrientation();
+		Serial.println(currentOrientation);
 		checkSpeedChange();
 	}
 
@@ -607,7 +610,7 @@ bool Robot::searchLine() {
 	// PRECONDITION: robot nearby the home
 
 	// rotate toward PI
-	double currentDirection = PI;
+	double currentDirection = 0;
 	adjustOrientation(currentDirection);
 
 	// search line first forward, then backward
@@ -615,34 +618,53 @@ bool Robot::searchLine() {
 	motion.moveForward(cruiseSpeed);
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
 		position.update();
-		if (isOnBlackLine()) {
+		if (!canMoveForward()) {
 			motion.stop();
 		 	position.update();
-			adjustOrientation(fmod(currentDirection + PI, 2*PI)); // dietrofront 
+		 	currentDirection = fmod(currentDirection + PI, 2*PI);
+			adjustOrientation(currentDirection); // dietrofront 
+			motion.moveForward(cruiseSpeed);
 		}
 		checkSpeedChange();
 	}
 	if (isOnBlueLine()) {
 		motion.stop();
+		Serial.println("Found orange line");
 		position.update();
 
 		// orienting to the right way of the line. Hypothesis: line is not going away from the home
-		int threshold = 200;
-		int rightReflectance = lineSensor.rightReflectance();
-		int leftReflectance = lineSensor.leftReflectance(); 
-		while (leftReflectance > threshold || rightReflectance > threshold) {
-			if (leftReflectance > rightReflectance) {
-				motion.rotateLeft(rotationalCruiseSpeed);
-			} else {
-				motion.rotateRight(rotationalCruiseSpeed);
-			}
-			rightReflectance = lineSensor.rightReflectance();
-			leftReflectance = lineSensor.leftReflectance(); 
-		} 
+		motion.moveForward(cruiseSpeed);
+		unsigned long taskStartTime = millis();
+		while (isOnBlueLine() && millis() - taskStartTime > TASK_TIME_OUT) {
+			checkSpeedChange();
+		}
+		motion.stop();
+		if (position.getOrientation() > PI/2 && position.getOrientation() < 3/2*PI) {
+			motion.rotateLeft(rotationalCruiseSpeed);
+		} else {
+			motion.rotateRight(rotationalCruiseSpeed);
+		}
+		taskStartTime = millis();
+		while (!isOnBlueLine()) {
+			checkSpeedChange();
+			if (millis() - taskStartTime > TASK_TIME_OUT) {
+				motion.stop();
+				Serial.println("Timeout of refine position on line");
+				enterPanicState();
+				return false;
+			} 
+		}
+		motion.stop();
 		return true;
 	} else if (millis()-startTime > TIME_OUT) {
 		motion.stop();
-		position.update();
+		Serial.println("Timeout of search line");
+		enterPanicState();
+		return false;
+	} else {
+		motion.stop();
+		Serial.println("Not on line after the search");
+		enterPanicState();
 		return false;
 	}
 }
@@ -657,90 +679,103 @@ bool Robot::followLineToHome() {
 	// 	}
 	// }
 
-	//*********************for test
-	while(!isOnBlueLine()){ };
-	int drift = 0;
 	unsigned long startTime = millis();
-	bool tryToFollowLine = true;
-	
-	// continue until time out or not able to refind the Blue line
-	while(tryToFollowLine){
-		while (isOnBlueLine() && /*highDistanceTop.distance() > 30 &&*/ millis()-startTime < TIME_OUT ) {
-			drift = lineSensor.rightReflectance() - lineSensor.leftReflectance();
-			Serial.print("Drift: ");
-			Serial.println(drift);
-			motion.moveForwardWithDrift(3, drift);
-		}
 
+	// continue until time out or not able to refind the Blue line
+	motion.moveForward(cruiseSpeed);
+	while(millis()-startTime < LONG_TIME_OUT ){
+		while (isOnBlueLine() && highDistanceTop.distance() > 20) {
+			
+		}
+		motion.stop();
 		Serial.println("Exit from the loop");
-		if (millis()-startTime > TIME_OUT) {
-			Serial.println("finished for time out in follow line to home");
+		if (!isOnBlueLine()) {
 			motion.stop();
-			enterPanicState();
-			return false;
-		} else if (!isOnBlueLine()) {
-			motion.stop();
+			
 			Serial.println("not on blu line - try to refind it");
 			if (!refindBlueLine()) {
+				if (isOnBlack()) {
+					Serial.println("Arrived home");
+					return true;
+				}
 				enterPanicState();
 				return false;
 			} 
 			
-		}
-		
-	}
-	motion.stop();
-	return true;
-}
-
-bool Robot::refindBlueLine() {
-	unsigned long startTime = millis();
-	while (!isOnBlueLine() && millis()-startTime < TIME_OUT ) {
-		if (lineSensor.leftReflectance() - lineSensor.rightReflectance() > 80) {
-			Serial.println("refind blue line - rotate left");
-			rotateLeft(2 * TOLERANCE_ANGLE);
-		} else if (lineSensor.rightReflectance() - lineSensor.leftReflectance() > 80) {
-			Serial.println("refind blue line - rotate right");
-			rotateRight(2 * TOLERANCE_ANGLE);
-		} else {
-
-			// make a complete rotation
-			Serial.println("make complete rotation");
-			double startAngle = position.getOrientation();
-			double arriveAngle = startAngle - 2 * TOLERANCE_ANGLE;
-			double arriveAngleMod = fmod(2*PI + arriveAngle, 2*PI);
-			double distanceBottom;
-			double currentOrientation = position.getOrientation();
-		
-			int speed = rotationalCruiseSpeed;	
-			unsigned long startTime = millis();
-			
-			while (arriveAngle >= 0 ? 
-				(currentOrientation < arriveAngleMod || currentOrientation > startAngle):
-				(currentOrientation < arriveAngleMod && currentOrientation > startAngle)){
-				
-				rotateLeft(2 * TOLERANCE_ANGLE);
-				
-				if (isOnBlueLine()){
-					motion.stop();
-					delay(20);
-					if(isOnBlueLine()) // recheck to be sure with stop motors
-						return true;
-					else
-						continue;	
-				}
-				
-				if( millis() - startTime > TIME_OUT){
-					motion.stop();
+		} 
+		if (highDistanceTop.distance() < 20) {
+			if (isOnBlack()) {
+				return true;
+			} else {
+				delay(4000);
+				if (highDistanceTop.distance() < 20) {
 					return false;
 				}
 			}
 		}
+		motion.moveForward(cruiseSpeed);
+		
 	}
-	if (isOnBlueLine())
-		return true;
-	else 
+	motion.stop();
+
+	Serial.println("finished for time out in follow line to home");
+	enterPanicState();
+	return false;
+}
+
+bool Robot::refindBlueLine() {
+
+	unsigned long startTime = millis();
+
+	motion.rotateLeft(rotationalCruiseSpeed);
+	Serial.println("Entered in refindLine");
+	while(millis() - startTime < m500_TIME_OUT/2){
+		if (isOnBlueLine()){
+			motion.stop();	
+			Serial.println("refound line");
+			return true;
+		}
+	}
+	motion.stop();
+	delay(50);
+	startTime = millis();
+	motion.rotateRight(rotationalCruiseSpeed);
+	while(millis() - startTime <  m500_TIME_OUT){
+		if (isOnBlueLine()){
+			motion.stop();	
+			Serial.println("refound line");
+			return true;
+		}
+	}
+	motion.stop();
+	if (isOnBlack()) {
+		Serial.println("Arrived home");
 		return false;
+	}
+	delay(50);
+	startTime = millis();
+	motion.rotateRight(rotationalCruiseSpeed);
+	while(millis() - startTime < m500_TIME_OUT){
+		if (isOnBlueLine()){
+			motion.stop();	
+			Serial.println("refound line");
+			return true;
+		}
+	}
+	motion.stop();
+	delay(50);
+	startTime = millis();
+	motion.rotateLeft(rotationalCruiseSpeed);
+	while(millis() - startTime <  m500_TIME_OUT*2){
+		if (isOnBlueLine()){
+			motion.stop();	
+			Serial.println("refound line");
+			return true;
+		}
+	}
+	motion.stop();
+	Serial.println("Line not refound");
+	return false;
 }
 
 bool Robot::deposit() {
@@ -939,13 +974,11 @@ bool Robot::rotateToFreeDirection(){
 }
 	
 // It doesn't need anymore
-bool Robot::isOnBlackLine(){
-	//test
-	return false;
+bool Robot::isOnBlack(){
   // take into consideration if need to separate check of color when in rotation and in moveForward:
 	// the first doesn't need update, the second one does.
 
-	//return lineSensor.color() == 'k';
+	return lineSensor.color() == 'k';
 }
 
 
@@ -986,8 +1019,8 @@ bool Robot::rotateRight(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (!canMoveForward())
-			return rotateLeft(angleRad);
+		// if (!canMoveForward())
+		// 	return rotateLeft(angleRad);
 
 		checkSpeedChange(); // it's possible to increase the speed while it's rotating
 	}
@@ -1039,8 +1072,8 @@ bool Robot::rotateLeft(double angleRad){
 			enterPanicState();
 			return false;
 		}
-		if (!canMoveForward())
-			return rotateRight(angleRad);
+		// if (!canMoveForward())
+		// 	return rotateRight(angleRad);
 		checkSpeedChange(); // it's possible to increase the speed while it's rotating
 	}
 	motion.stop();
@@ -1130,6 +1163,7 @@ bool Robot::tryToRefindEgg(){
 	motion.stop();
 	
 	startTime = millis();
+	motion.rotateRight(rotationalCruiseSpeed);
 	while(millis() - startTime <  m100_TIME_OUT){
 		if ( proximity.distance() < 15){
 			motion.stop();	
@@ -1161,6 +1195,7 @@ bool Robot::tryToRefindEggFromDistance(){
 	motion.stop();
 	
 	startTime = millis();
+	motion.rotateRight(rotationalCruiseSpeed);
 	while(millis() - startTime < 2 * m100_TIME_OUT){
 		if (highDistanceBottom.distance() < 60 || proximity.distance() < 15){
 			motion.stop();	
@@ -1214,7 +1249,7 @@ bool Robot::isOnBlueLine() {
 	Serial.println("Color: ");
 	char color = lineSensor.color();
 	Serial.println(color);
-	return color == 'k';
+	return color == 'o';
 }
 
 void Robot::rotateToAngle(double angle) {
