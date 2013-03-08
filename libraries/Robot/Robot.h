@@ -46,12 +46,14 @@
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 70
+#define ACCELERATION_SPEED 50
 #define CRUISE_SPEED 40
-#define ROTATIONAL_CRUISE_SPEED 75
+#define ROTATIONAL_CRUISE_SPEED 50
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
+
+#define CM_OUT_OF_HOME 30
 
 
 class Robot {
@@ -79,6 +81,7 @@ public:
 	bool comeBackHomeSimple();
 	bool changePositionSimple();
 	bool searchEggSimple();
+	bool checkPanicState();
 private:
 	Position position;
 	Motion motion;
@@ -88,6 +91,7 @@ private:
 	LineSensor lineSensor;
 	Feet feet;
 	Remote remote;
+	bool eggOnBoard;
 	bool adjustOrientation(double angleToFollow);
 	void enterPanicState();
   	

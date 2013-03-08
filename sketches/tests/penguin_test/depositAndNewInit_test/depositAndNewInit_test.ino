@@ -8,7 +8,7 @@
 #include <Pins.h>
 #include <PS2.h>
 #include <HMC5883L.h>
-#include <Servo.h>
+#include <SoftwareServo.h>
 #include <IRremote.h>
 #include <ADJDS311.h>
 #include <Wire.h>
@@ -28,9 +28,11 @@ void setup() {
   Wire.begin();
   robot.init();
   Serial.println("Robot init finished ----------");
-  delay(3000);
+  delay(5000);
   
   // PRECONDITION: in front of the home
+  robot.catchEgg();
+  delay(3000);
   result = robot.deposit();
   if (result == true) {
     Serial.println("Egg deposited! -------------");

@@ -30,6 +30,9 @@ void setup() {
   Serial.println("Robot init finished ----------");
   delay(3000);
   
+  robot.catchEgg();
+  delay(3000);
+  
   // PRECONDITION: is on blue line, and there is no obstacle in front other then the home...  result = robot.searchLine();
   result = robot.followLineToHome();
   if (result == true) {

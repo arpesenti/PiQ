@@ -28,8 +28,6 @@ void setup() {
         Wire.begin();
 	state = WAIT;
 	robot.init();
-        pinMode(13, OUTPUT);
-        digitalWrite(13, LOW);
         Serial.println("init");
 }
 
@@ -40,8 +38,7 @@ void loop() {
       Serial.println("----- WAIT -----");
       robot.escapeFromWait();
       delay(1000);
-      robot.changePosition();
-      digitalWrite(13, HIGH);
+      //robot.changePosition();
       break;
       
     case EXPLORE_SCAN:
@@ -89,7 +86,7 @@ void loop() {
         changeStateTo(COMEBACK_LINESEARCHING);
       else if (result == APPROACH_FAILED)
         Serial.println("Approach failed");
-        //TODO what to do when failed?
+        changeStateTo(COMEBACK_LINESEARCHING);
       break;
       
     case COMEBACK_LINEFOLLOWING:

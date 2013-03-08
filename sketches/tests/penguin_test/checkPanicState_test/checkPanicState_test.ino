@@ -28,27 +28,14 @@ void setup() {
   Wire.begin();
   robot.init();
   Serial.println("Robot init finished ----------");
-  delay(2000);
-  robot.catchEgg();
-  // PRECONDITION: robot nearby the home
-  result = robot.searchLine();
-  if (result == true) {
-    Serial.println("Line found! -------------");
-    delay(3000);
-    result = robot.followLineToHome();
-    if (result == true) {
-      Serial.println("Arrived home! -------------");
-    } else {
-      Serial.println("Failed folowing line! -------------");
-    }
-  } else {
-    Serial.println("Line Not found --------------"); 
-  }
-  if (state == PANIC) {
-    Serial.println("------ PANIC -------");
-  }
 }
 
 void loop() {
+  if (robot.checkPanicState()) {
+    Serial.println("_________Panic____________");
+    digitalWrite(PANIC_LED, HIGH);
+    state = PANIC;
+    robot.escapeFromPanic();
+  }
   
 }

@@ -125,7 +125,7 @@ void Position::calibrate(Motion &motion, bool newCalibration) {
 		Serial.println(compass.GetErrorText(error));
 	}
 	if (newCalibration) {
-		int speed = 10;
+		int speed = 20;
 		motion.rotateRight(speed);
 		for (int index = 0; index < 16; index++) {
        	  	for(int x=0;x<100;x++) {  //continualy read the raw axis data while waiting for operator to slowly rotate compass to next position

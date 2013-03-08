@@ -6,7 +6,7 @@
 
 #define MAX_DIMENSION_SAMPLES 11
 #define HISTORY_WIDTH 3
-#define ALPHA_FILTER 1.0
+#define ALPHA_FILTER 0.8
 
 struct sample{
 	int distance;

@@ -29,6 +29,9 @@ void setup() {
   robot.init();
   Serial.println("Robot init finished ----------");
   delay(3000);
+  //robot.start();
+  //Serial.println("normal End of start");
+  //delay(3000);
   result = robot.scanForEgg();
   if (result == true)
     Serial.println("Egg found! -------------");
