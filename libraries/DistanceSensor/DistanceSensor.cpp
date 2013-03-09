@@ -9,6 +9,7 @@ DistanceSensor::DistanceSensor() {
 		history[i] = 0;
 	}		
 	previousValue = 0;
+	previousTime = 0;
 }
 
 void DistanceSensor::initProximity(){
@@ -48,7 +49,11 @@ double DistanceSensor::distance() {
 	for(int i = 0; i < HISTORY_WIDTH; i++) {
 		history[i] = analogRead(pin);
 	}
+	if (millis() - previousTime > 1000) {
+		previousValue = 0;
+	}
 	double value = exponentialFilter(median(history));
+	previousTime = millis();
 	return interpolate(value);
 	//return value;	
 }

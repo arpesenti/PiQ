@@ -25,6 +25,7 @@ private:
 	sample table[MAX_DIMENSION_SAMPLES]; 
 	int num_samples;
 	double previousValue;
+	unsigned long previousTime;
 	double history[HISTORY_WIDTH];
 	double median(double x[]);
 	double interpolate(double readValue);
