@@ -5,7 +5,7 @@
 #include <IRremote.h>
 #include <Pins.h>
 
-#define NORMAL_STRATEGY_BUTTON 0x10EF827D // button 1
+#define NORMAL_STRATEGY_BUTTON 0x10EF827D // button 1 - put robot in exploreScan
 #define NORMAL_STRATEGY '1'
 #define PANIC_STRATEGY_BUTTON 0x10EFD02F // power button
 #define PANIC_STRATEGY '2'
@@ -27,7 +27,7 @@
 #define REMOTE_INCREASE_SPEED 'a'
 #define REMOTE_DECREASE_SPEED_BUTTON 0x10EF10EF // Red button
 #define REMOTE_DECREASE_SPEED 'b'
-#define SEARCH_LINE_STRATEGY_BUTTON 0x10EF28D7 // blu button
+#define SEARCH_LINE_STRATEGY_BUTTON 0x10EF28D7 // blu button - put robot in searchLine
 #define SEARCH_LINE_STRATEGY 'C'
 
 

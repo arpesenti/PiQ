@@ -8,6 +8,7 @@
 #include <LineSensor.h>
 #include <Feet.h>
 #include <Remote.h>
+#include <Eyes.h>
 
 // States
 #define WAIT 0
@@ -91,6 +92,7 @@ private:
 	LineSensor lineSensor;
 	Feet feet;
 	Remote remote;
+	Eyes eyes;
 	bool eggOnBoard;
 	bool adjustOrientation(double angleToFollow);
 	void enterPanicState();

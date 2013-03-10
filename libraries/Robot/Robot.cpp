@@ -25,6 +25,7 @@ void Robot::init() {
 	eggOnBoard = false;
 	pinMode(PANIC_LED, OUTPUT);
 	digitalWrite(PANIC_LED, LOW);
+	eyes.init();
 	Serial.println("Robot finish init");
 }
 
@@ -623,7 +624,7 @@ int Robot::tryToApproach() {
 				}
 			
 				if(!changePosition())
-					return APPROACH_FAILED; //panic state
+					return APPROACH_FAILED; // panic state
 				position.update();
 				distanceOld = distanceNew;
 				distanceNew = sqrt(square(position.getX()) + square(position.getY()));
@@ -644,9 +645,9 @@ int Robot::tryToApproach() {
 	position.update();
 	if (millis() - startTime > TIME_OUT) {
 		enterPanicState();
-		return APPROACH_FAILED;
+		return APPROACH_FAILED; // panic state
 	}
-	return APPROACH_FOUND_LINE;
+	return APPROACH_NOT_FOUND_LINE; // OK also in case the line is found
 
 
 //****************************************
@@ -670,14 +671,20 @@ bool Robot::searchLine() {
 	motion.moveForward(cruiseSpeed);
 	unsigned long partialStartTime = millis();
 	while (!isOnBlueLine() && millis()-startTime < LONG_TIME_OUT) {
-		if (millis() - partialStartTime < 1000) {
+		if (millis() - partialStartTime < 1500) {
 			motion.stop();
 			adjustOrientation(currentDirection);
 			SoftwareServo::refresh();
 			motion.moveForward(cruiseSpeed);
+			partialStartTime = millis(); 
 		}
 		if (!canMoveForward()) {
 			motion.stop();
+			delay(4000); // wait for passing robots
+			if(canMoveForward()){
+				motion.moveForward(cruiseSpeed);
+				continue;
+			}
 		 	currentDirection = fmod(currentDirection + PI, 2*PI);
 			adjustOrientation(currentDirection); // dietrofront 
 			SoftwareServo::refresh();
@@ -725,15 +732,13 @@ bool Robot::searchLine() {
 		}
 		motion.stop();
 		return true;
-	} else if (millis()-startTime > TIME_OUT) {
+	} else if (millis()-startTime >=  LONG_TIME_OUT) {
 		motion.stop();
 		Serial.println("Timeout of search line");
 		enterPanicState();
 		return false;
-	} else {
-		motion.stop();
-		Serial.println("Not on line after the search");
-		enterPanicState();
+	} else{
+		Serial.println("this should never happen, in theory!");
 		return false;
 	}
 }
@@ -871,6 +876,7 @@ bool Robot::newInit() {
 	// PRECONDITION: egg released, facing the home
 
 	moveBackward(CM_OUT_OF_HOME);
+	delay(500);
 	rotateToAngle(PI/2);
 	position.reset();
 	return true; // could it fail?
@@ -882,22 +888,27 @@ bool Robot::escapeFromPanic() {
 		char command = remote.strategy();
 		if (command == NORMAL_STRATEGY) {
 			motion.stop();
+			eyes.commandBlink(state);
 			state = EXPLORE_SCAN;
 		} else if (command == SEARCH_LINE_STRATEGY) {
 			motion.stop();
+			eyes.commandBlink(state);
 			state = COMEBACK_LINESEARCHING;
 		}else if (command == REMOTE_ROTATELEFT) {
 			motion.stop();
+			eyes.commandBlink(state);
 			motion.rotateLeft(rotationalCruiseSpeed);
 			delay(500);
 			motion.stop();
 		} else if (command == REMOTE_ROTATERIGHT) {
 			motion.stop();
+			eyes.commandBlink(state);
 			motion.rotateRight(rotationalCruiseSpeed);
 			delay(500);
 			motion.stop();
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
+			eyes.commandBlink(state);
 			unsigned long startTime = millis();
 			motion.moveForward(cruiseSpeed);
 			while( millis() - startTime < 500);
@@ -905,6 +916,7 @@ bool Robot::escapeFromPanic() {
 			motion.stop();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
+			eyes.commandBlink(state);
 			unsigned long startTime = millis();
 			motion.moveBackward(cruiseSpeed);
 			while( millis() - startTime < 500);
@@ -912,6 +924,7 @@ bool Robot::escapeFromPanic() {
 			motion.stop();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
+			eyes.commandBlink(state);
 		} else if (command == REMOTE_INCREASE_SPEED) {
 			if (cruiseSpeed + 5 <= 100)
 				cruiseSpeed += 5;
@@ -919,6 +932,7 @@ bool Robot::escapeFromPanic() {
 				rotationalCruiseSpeed += 5;
 			Serial.print("New speed: ");
 			Serial.println(rotationalCruiseSpeed);
+			eyes.commandBlink(state);
 		} else if (command == REMOTE_DECREASE_SPEED) {
 			if (cruiseSpeed - 5 > 0)
 				cruiseSpeed -= 5;
@@ -926,14 +940,17 @@ bool Robot::escapeFromPanic() {
 				rotationalCruiseSpeed -= 5;
 			Serial.print("New speed: ");
 			Serial.println(rotationalCruiseSpeed);
+			eyes.commandBlink(state);
 		} else if (command == REMOTE_OPENFEET) {
 			motion.stop();
 			feet.open();
 			eggOnBoard = false;
+			eyes.commandBlink(state);
 		} else if (command == REMOTE_CLOSEFEET) {
 			motion.stop();
 			feet.close();
 			eggOnBoard = true;
+			eyes.commandBlink(state);
 		}
 	}
 	motion.stop();
@@ -946,6 +963,7 @@ bool Robot::escapeFromWait() {
 		remote.update();
 		char command = remote.strategy();
 		if (command == NORMAL_STRATEGY) {
+			eyes.commandBlink(state);
 			start();
 			state = EXPLORE_SCAN;
 		} 
@@ -1369,12 +1387,14 @@ void Robot::checkSpeedChange() {
 	char strategy = remote.strategy();
 	int step = 5;
 	if (strategy == REMOTE_INCREASE_SPEED) {
+		eyes.commandBlink(state);
 		Serial.println("increase speed");
 		if (cruiseSpeed + 5 <= 100)
 			cruiseSpeed += 5;
 	 	if (rotationalCruiseSpeed + 5 <= 100)
 			rotationalCruiseSpeed += 5;
 	} else if (strategy == REMOTE_DECREASE_SPEED) {
+		eyes.commandBlink(state);
 		Serial.println("decrease speed");
 		if (cruiseSpeed - 5 > 0)
 			cruiseSpeed -= 5;
