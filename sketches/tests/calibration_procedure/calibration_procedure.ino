@@ -15,6 +15,7 @@
 #include <AFMotor.h>
 #include <RobotMotor.h>
 #include <EEPROM.h>
+#include <Eyes.h>
 
 
 Robot robot;

@@ -47,7 +47,8 @@
 #define APPROACH_NOT_FOUND_LINE 2
 #define APPROACH_FAILED 3
 
-#define ACCELERATION_SPEED 50
+#define SPEED_INCREMENT 15
+#define SPEED_INCREMENT_ROTATION 20
 #define CRUISE_SPEED 40
 #define ROTATIONAL_CRUISE_SPEED 50
 
@@ -108,11 +109,11 @@ private:
 	char readStrategy();
 	bool isOnBlueLine();
 	void rotateToAngle(double angle);
-	void checkSpeedChange();
+	bool checkSpeedChange();
 	bool refindBlueLine();
 	bool tryToRefindEggFromDistance();
 	int freeRam();
-
+	void fixFeet();
 };
 
 #endif

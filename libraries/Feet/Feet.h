@@ -5,7 +5,7 @@
 #include <SoftwareServo.h>
 #include <Pins.h>
 
-#define OPEN_ANGLE 30
+#define OPEN_ANGLE 20
 #define LEFT_CLOSED_ANGLE 170
 #define RIGHT_CLOSED_ANGLE 10
 #define PARTIAL_OPEN_ANGLE 20

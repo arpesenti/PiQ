@@ -49,7 +49,7 @@ double DistanceSensor::distance() {
 	for(int i = 0; i < HISTORY_WIDTH; i++) {
 		history[i] = analogRead(pin);
 	}
-	if (millis() - previousTime > 1000) {
+	if (millis() - previousTime > 500) {
 		previousValue = 0;
 	}
 	double value = exponentialFilter(median(history));
