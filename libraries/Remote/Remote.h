@@ -29,6 +29,8 @@
 #define REMOTE_DECREASE_SPEED 'b'
 #define SEARCH_LINE_STRATEGY_BUTTON 0x10EF28D7 // blu button - put robot in searchLine
 #define SEARCH_LINE_STRATEGY 'C'
+#define COMEBACK_STRATEGY_BUTTON 0x10EF08F7 // yellow button - put robot in positioningTowardHome
+#define COMEBACK_STRATEGY 'd'
 
 
 #define REMOTE_NO_STRATEGY 'n'

@@ -82,7 +82,7 @@ void loop() {
       result = robot.tryToApproach();
       if (result == APPROACH_FOUND_LINE) {
         Serial.println("Approach found line");
-        changeStateTo(COMEBACK_LINEFOLLOWING); // this never happens - we don't check the line while approaching home
+        changeStateTo(COMEBACK_LINEFOLLOWING);
       } else if (result == APPROACH_NOT_FOUND_LINE) {
         Serial.println("Approach not found line");
         changeStateTo(COMEBACK_LINESEARCHING);

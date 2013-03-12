@@ -40,7 +40,11 @@ void Motion::stop() {
 void Motion::rotateLeft(int speed) {
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
-   
+
+ 	motorReverse(MOTOR_LEFT, ACCELERATION_SPEED);
+	motorForward(MOTOR_RIGHT, ACCELERATION_SPEED);
+	delay(ACCELERATION_TIME);
+
 	motorReverse(MOTOR_LEFT, speedLeft);
 	motorForward(MOTOR_RIGHT, speedRight);
 }
@@ -49,6 +53,10 @@ void Motion::rotateRight(int speed) {
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
    
+	motorForward(MOTOR_LEFT, ACCELERATION_SPEED);
+	motorReverse(MOTOR_RIGHT, ACCELERATION_SPEED);
+	delay(ACCELERATION_TIME);
+
 	motorForward(MOTOR_LEFT, speedLeft);
 	motorReverse(MOTOR_RIGHT, speedRight);
 }

@@ -35,7 +35,9 @@ void Remote::update() {
 			currentStrategy = REMOTE_DECREASE_SPEED;
 		} else if (results.value == SEARCH_LINE_STRATEGY_BUTTON) {
 			currentStrategy = SEARCH_LINE_STRATEGY;
-		} 
+		} else if (results.value == COMEBACK_STRATEGY_BUTTON) {
+			currentStrategy = COMEBACK_STRATEGY;
+		}
 
     	receiver.resume();
 	} 

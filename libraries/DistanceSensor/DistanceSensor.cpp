@@ -53,9 +53,9 @@ double DistanceSensor::distance() {
 		previousValue = 0;
 	}
 	double value = exponentialFilter(median(history));
+	value = interpolate(value);
 	previousTime = millis();
-	return interpolate(value);
-	//return value;	
+	return value;
 }
 
 double DistanceSensor::interpolate(double readValue) {
