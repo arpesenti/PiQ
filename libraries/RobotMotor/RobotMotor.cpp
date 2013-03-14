@@ -33,6 +33,8 @@ int rotationTime[NBR_SPEEDS] = {5500, 3300, 2400, 2000, 1750, 1550, 1150}; // ti
 AF_DCMotor motors[] = {
     // AF_DCMotor(1, MOTOR12_1KHZ), // left is Motor #1 
     // AF_DCMotor(2, MOTOR12_1KHZ)  // right is Motor #2
+    // AF_DCMotor(1, MOTOR34_1KHZ), // left is Motor #1 
+    // AF_DCMotor(2, MOTOR34_1KHZ)  // right is Motor #2
     AF_DCMotor(1), // left is Motor #1 
     AF_DCMotor(2)  // right is Motor #2
 	};

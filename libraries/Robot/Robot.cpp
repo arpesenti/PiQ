@@ -90,10 +90,10 @@ void Robot::start(){
 
 		position.update();
 		distance = position.getY() / MOUSE_SCALE; // it moves with orientation PI/2
-		// position.update();
-		// //Serial.println(position.getX());
-		// position.update();
-  // 	Serial.println(position.getY());
+		position.update();
+		//Serial.println(position.getX());
+		position.update();
+  	Serial.println(position.getY());
   	position.update();
 		
 	}
@@ -800,7 +800,12 @@ bool Robot::searchLine() {
 	}
 	motion.stop();
 	fixFeet();
-	if (isOnBlueLine()) {
+	fixFeet();
+	if (millis()-startTime >= TIME_OUT) {
+		motion.stop();
+		enterPanicState();
+		return false;
+	} else {
 		Serial.println("Found orange line");
 		if (position.getOrientation() > PI/2 && position.getOrientation() < 3/2*PI) {
 			motion.rotateLeft(rotationalCruiseSpeed);
@@ -839,101 +844,6 @@ bool Robot::searchLine() {
 		motion.stop();
 		fixFeet();
 		return true;
-	} else if (millis()-startTime >= TIME_OUT) {
-		motion.stop();
-		Serial.println("Timeout of search line, LAST TRY!");
-		// last try: move 3/2*PI
-		if (!adjustOrientation(3/2*PI)) return false;
-		motion.moveForward(cruiseSpeed);
-		while (canMoveForward() && millis()-startTime < LONG_TIME_OUT) {
-			checkSpeedChange();
-			checkPanicState();	
-		}
-		motion.stop();
-		currentDirection = 0;
-		if (!adjustOrientation(currentDirection)) return false;
-		motion.moveForward(cruiseSpeed);
-		startTime = millis();
-		while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
-			if (millis() - partialStartTime > 1000) {
-				motion.stop();
-				if (!adjustOrientation(currentDirection)) return false;
-				fixFeet();
-				motion.moveForward(cruiseSpeed);
-				partialStartTime = millis(); 
-			}
-			if (!canMoveForward()) {
-				motion.stop();
-				delay(4000); // wait for passing robots
-				if(canMoveForward()){
-					motion.moveForward(cruiseSpeed);
-					continue;
-				}
-
-				if (currentDirection == 0) {
-					motion.rotateLeft(rotationalCruiseSpeed);
-				} else {
-					motion.rotateRight(rotationalCruiseSpeed);
-				}
-				delay(600);
-				motion.stop();
-
-			 	currentDirection = fmod(currentDirection + PI, 2*PI);
-				if (!adjustOrientation(currentDirection)) return false; // dietrofront 
-				fixFeet();
-				motion.moveForward(cruiseSpeed);
-			}
-			checkSpeedChange();
-		}
-		motion.stop();
-		fixFeet();
-		if (isOnBlueLine()) {
-			Serial.println("Found orange line");
-			if (position.getOrientation() > PI/2 && position.getOrientation() < 3/2*PI) {
-				motion.rotateLeft(rotationalCruiseSpeed);
-			} else {
-				motion.rotateRight(rotationalCruiseSpeed);
-			}
-			delay(300);
-			motion.stop();
-			fixFeet();
-			// orienting to the right way of the line. Hypothesis: line is not going away from the home
-			motion.moveForward(cruiseSpeed);
-			unsigned long taskStartTime = millis();
-			while (isOnBlueLine() && millis() - taskStartTime > TASK_TIME_OUT) {
-				checkSpeedChange();
-			}
-			delay(100);
-			motion.stop();
-			SoftwareServo::refresh();
-			if (position.getOrientation() > PI/2 && position.getOrientation() < 3/2*PI) {
-				motion.rotateLeft(rotationalCruiseSpeed);
-			} else {
-				motion.rotateRight(rotationalCruiseSpeed);
-			}
-			taskStartTime = millis();
-			while (!isOnBlueLine()) {
-				Serial.println("Rotating to orient in the right direction");
-				SoftwareServo::refresh();
-				checkSpeedChange();
-				if (millis() - taskStartTime > SHORT_TIME_OUT) {
-					motion.stop();
-					Serial.println("Timeout of refine position on line");
-					enterPanicState();
-					return false;
-				} 
-			}
-			motion.stop();
-			fixFeet();
-			return true;
-		} else {
-			enterPanicState();
-			return false;
-		}
-	} else{
-		Serial.println("this should never happen, in theory!");
-		enterPanicState();
-		return false;
 	}
 }
 
@@ -1308,7 +1218,6 @@ bool Robot::rotateRight(double angleRad){
 // angleRad must be between 0 and 2*PI
 
 	Serial.println("enter rotate right");
-	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
 
 	double initialOrientation = position.getOrientation();
@@ -1321,9 +1230,10 @@ bool Robot::rotateRight(double angleRad){
 	Serial.println(toAngle);
 
 	int count = 1;
-	int interval = 300;
+	int interval = 100;
 	fixFeet();
 	delay(50);
+	unsigned long startTime = millis();
 	motion.rotateRight(rotationalCruiseSpeed);
 	
 	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
@@ -1334,6 +1244,8 @@ bool Robot::rotateRight(double angleRad){
 		if (millisFromStart > count*interval) {
 			SoftwareServo::refresh();
 			count += 1;
+			if (checkSpeedChange()) 
+				motion.rotateRight(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 		}
 
 		if ( millisFromStart  > SHORT_TIME_OUT ){
@@ -1344,8 +1256,6 @@ bool Robot::rotateRight(double angleRad){
 		}
 		// if (!canMoveForward())
 		// 	return rotateLeft(angleRad);
-		if (checkSpeedChange()) 
-			motion.rotateRight(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 	}
 	
 	motion.stop();
@@ -1366,7 +1276,6 @@ bool Robot::rotateLeft(double angleRad){
 // angleRad must be between 0 and 2*PI
 
 	Serial.println("enter rotate left");
-	unsigned long startTime = millis();
 	unsigned long millisFromStart = 0;
 	double initialOrientation = position.getOrientation();
 	
@@ -1379,9 +1288,10 @@ bool Robot::rotateLeft(double angleRad){
 
 
 	int count = 1;
-	int interval = 300;
+	int interval = 100;
 	fixFeet();
 	delay(50);
+	unsigned long startTime = millis();
 	motion.rotateLeft(rotationalCruiseSpeed);
 
 	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
@@ -1392,6 +1302,8 @@ bool Robot::rotateLeft(double angleRad){
 		if (millisFromStart > count*interval) {
 			SoftwareServo::refresh();
 			count += 1;
+			if (checkSpeedChange()) 
+				motion.rotateLeft(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 		}
 		
 		if ( millisFromStart > SHORT_TIME_OUT ){
@@ -1402,8 +1314,6 @@ bool Robot::rotateLeft(double angleRad){
 		}
 		// if (!canMoveForward())
 		// 	return rotateRight(angleRad);
-		if (checkSpeedChange()) 
-			motion.rotateLeft(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 	}
 	motion.stop();
 	position.clearMouseBuffer();	

@@ -15,8 +15,8 @@
 #define MIN_SPEED_RIGHT 50
 #define DAMPING 5 //1 is most sensitive, range 1 to 1023
 
-#define ACCELERATION_SPEED 100
-#define ACCELERATION_TIME 10
+#define ACCELERATION_SPEED 20
+#define ACCELERATION_TIME 30
 
 class Motion {
 public:

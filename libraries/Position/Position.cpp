@@ -63,25 +63,27 @@ void Position::update() {
 
 void Position::reset() {
 	// PRECONDITION: robot must have exactly at his back the home
-
+	noInterrupts(); // Disabling interrupts
 	// clear mouse buffer
 	mouse.write(0xeb); // ask data
 	mouse.read(); // ignore acknowledgement 
 	mouse.read(); // mstat
 	char dx = mouse.read();
 	char dy = mouse.read();
-
+	interrupts(); // Enabling interrupts
 	x = 0;
 	y = 0;
 }
 
 // just clear readings. It must be call after a rotation of the robot
 void Position::clearMouseBuffer(){
+	noInterrupts(); // Disabling interrupts
 	mouse.write(0xeb); // ask data
 	mouse.read(); // ignore acknowledgement 
 	mouse.read(); // mstat
 	char dx = mouse.read();
 	char dy = mouse.read();
+	interrupts(); // Enabling interrupts
 }
 
 
