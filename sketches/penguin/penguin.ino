@@ -75,6 +75,8 @@ void loop() {
       Serial.println("----- COMEBACK_POSITIONING -----");
       if(robot.positioningTowardHome()) 
         changeStateTo(COMEBACK_APPROACHING);  
+      else
+        changeStateTo(COMEBACK_POSITIONING);
       break;
       
     case COMEBACK_APPROACHING:

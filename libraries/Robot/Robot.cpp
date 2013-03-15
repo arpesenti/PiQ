@@ -1230,7 +1230,7 @@ bool Robot::rotateRight(double angleRad){
 	Serial.println(toAngle);
 
 	int count = 1;
-	int interval = 100;
+	int interval = 300;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
@@ -1288,7 +1288,7 @@ bool Robot::rotateLeft(double angleRad){
 
 
 	int count = 1;
-	int interval = 100;
+	int interval = 300;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
