@@ -15,6 +15,7 @@ void Motion::init(){
 // N.B. speed is a value between 0 and 100 (representing a percentage)
 
 void Motion::moveForward(int speed) {
+	if (speed >= 100) speed = 99;
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
    
@@ -24,6 +25,7 @@ void Motion::moveForward(int speed) {
 }
 
 void Motion::moveBackward(int speed) {
+	if (speed >= 100) speed = 99;
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
    
@@ -38,6 +40,7 @@ void Motion::stop() {
 }
 
 void Motion::rotateLeft(int speed) {
+	if (speed >= 100) speed = 99;
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
 
@@ -50,6 +53,7 @@ void Motion::rotateLeft(int speed) {
 }
 
 void Motion::rotateRight(int speed) {
+	if (speed >= 100) speed = 99;
 	int speedLeft = minSpeedLeft + speed/100.0 * availableSpeed;
 	int speedRight = minSpeedRight + speed/100.0 * availableSpeed;
    

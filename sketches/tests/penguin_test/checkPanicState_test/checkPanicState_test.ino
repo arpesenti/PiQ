@@ -15,6 +15,7 @@
 #include <AFMotor.h>
 #include <RobotMotor.h>
 #include <EEPROM.h>
+#include <Eyes.h>
 
 // Robot
 Robot robot;
@@ -28,14 +29,10 @@ void setup() {
   Wire.begin();
   robot.init();
   Serial.println("Robot init finished ----------");
+  state = PANIC;
+  robot.escapeFromPanic();
 }
 
 void loop() {
-  if (robot.checkPanicState()) {
-    Serial.println("_________Panic____________");
-    digitalWrite(PANIC_LED, HIGH);
-    state = PANIC;
-    robot.escapeFromPanic();
-  }
   
 }

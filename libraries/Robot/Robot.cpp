@@ -70,7 +70,6 @@ void Robot::start(){
 			motion.stop();
 			position.update();
 			Serial.println("TASK_TIME_OUT of start");
-			enterPanicState(); // panic or simply stop?***************************************
 			break;
 		}
 
@@ -922,7 +921,7 @@ bool Robot::refindBlueLine() {
 	delay(50);
 	startTime = millis();
 	motion.rotateRight(rotationalCruiseSpeed);
-	while(millis() - startTime <  m500_TIME_OUT){
+	while(millis() - startTime <  m500_TIME_OUT*0.9){
 		SoftwareServo::refresh();
 		if (isOnBlueLine()){
 			motion.stop();	
@@ -950,7 +949,7 @@ bool Robot::refindBlueLine() {
 	delay(50);
 	startTime = millis();
 	motion.rotateLeft(rotationalCruiseSpeed);
-	while(millis() - startTime <  m500_TIME_OUT*3){
+	while(millis() - startTime <  m500_TIME_OUT*2.3){
 		SoftwareServo::refresh();
 		if (isOnBlueLine()){
 			motion.stop();	
@@ -1045,7 +1044,7 @@ bool Robot::escapeFromPanic() {
 		} else if (command == REMOTE_DECREASE_SPEED) {
 			if (cruiseSpeed - 5 > 0)
 				cruiseSpeed -= 5;
-			if (rotationalCruiseSpeed -5 >= 0)
+			if (rotationalCruiseSpeed - 5 > 0)
 				rotationalCruiseSpeed -= 5;
 			Serial.print("New speed: ");
 			Serial.println(rotationalCruiseSpeed);
@@ -1230,7 +1229,7 @@ bool Robot::rotateRight(double angleRad){
 	Serial.println(toAngle);
 
 	int count = 1;
-	int interval = 300;
+	int interval = 150;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
@@ -1288,7 +1287,7 @@ bool Robot::rotateLeft(double angleRad){
 
 
 	int count = 1;
-	int interval = 300;
+	int interval = 150;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
@@ -1537,7 +1536,7 @@ bool Robot::checkSpeedChange() {
 		Serial.println("decrease speed");
 		if (cruiseSpeed - 5 > 0)
 			cruiseSpeed -= 5;
-		if (rotationalCruiseSpeed -5 <= 0)
+		if (rotationalCruiseSpeed -5 > 0)
 			rotationalCruiseSpeed -= 5;
 		return true;
 	}
