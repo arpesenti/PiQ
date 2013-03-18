@@ -780,12 +780,14 @@ bool Robot::searchLine() {
 			}
 
 			if (currentDirection == 0) {
-				motion.rotateLeft(rotationalCruiseSpeed);
+				if (adjustOrientation(PI/2) == false) {
+					return false;
+				}	
 			} else {
-				motion.rotateRight(rotationalCruiseSpeed);
+				if (adjustOrientation(3/2*PI) == false) { 
+					return false;
+				}
 			}
-			delay(600);
-			motion.stop();
 
 		 	currentDirection = fmod(currentDirection + PI, 2*PI);
 
