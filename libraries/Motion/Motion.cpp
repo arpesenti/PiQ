@@ -87,21 +87,26 @@ void Motion::moveForwardWithDrift(int speed, int drift) {
 }
 
 // TODO - calibrate
-// void Motion::penguinWalking(Position& position) {
-// 	float T = 5; // period
+void Motion::penguinWalking() {
+	float T = 5; // period
   
-//   for (float t = 0.0; t <= 70.0; t += 0.1){    
-//   	motorForward(MOTOR_LEFT, minSpeedLeft + availableSpeed * cos(2*3.14/T*t));
-//   	motorForward(MOTOR_RIGHT, minSpeedRight +  availableSpeed * sin(2*3.14/T*t));
-// 		position.update();
-// 		delay(10);
-// 		position.update();
-// 		delay(10);
-// 		position.update();       
-//   }
+  for (float t = 0.0; t <= 70.0; t += 0.2){   
+  	motorForward(MOTOR_LEFT, minSpeedLeft + availableSpeed * cos(2*3.14/T*t));
+  	motorForward(MOTOR_RIGHT, minSpeedRight +  availableSpeed * sin(2*3.14/T*t));
+		// //position.update();
+		// delay(10);
+		// //position.update();
+		// delay(10);
+		// position.update();     
+		delay(20);
+		if (fmod(2*PI+2*3.14/T*t, 2*PI)<0.05 && abs(fmod(2*PI+2*3.14/T*t, 2*PI)-PI/2)<0.05 ) {
+			stop();
+			delay(50);
+		}
+  }
 	
-// 	stop();
-// 	position.update();
-// 	delay(10);
-// 	position.update();
-// }
+	stop();
+	// position.update();
+	// delay(10);
+	// position.update();
+}

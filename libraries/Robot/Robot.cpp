@@ -365,7 +365,7 @@ bool Robot::changePosition(){
 			//}
 		
 			if(!canMoveForward()){
-				delay(4000); // wait for passing robot
+				delay(1000); // wait for passing robot
 				if(!canMoveForward()){
 					moveBackward(10);
 					if (canMoveForward()) {
@@ -1082,7 +1082,7 @@ bool Robot::escapeFromWait() {
 		char command = remote.strategy();
 		if (command == NORMAL_STRATEGY) {
 			eyes.commandBlink(state);
-			start();
+			//start();
 			state = EXPLORE_SCAN;
 		} 
 	}

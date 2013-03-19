@@ -29,8 +29,8 @@ void setup() {
   Wire.begin();
   robot.init();
   Serial.println("Robot init finished ----------");
-  delay(3000);
-  
+  state = WAIT;
+  robot.escapeFromWait();
   result = robot.scanForEgg();
   if (result == true) {
     Serial.println("Egg found! -------------");
@@ -42,8 +42,12 @@ void setup() {
       Serial.println("Trying to catch it! -------------");
       delay(3000);
       result = robot.catchEgg();
-      if (result == true)
+      if (result == true) {
         Serial.println("Egg catched! -------------");
+        robot.positioningTowardHome();
+        robot.changePosition();
+        robot.deposit();
+      }
       else
         Serial.println("Not catched -------------");
     } else {

@@ -48,8 +48,8 @@
 
 #define SPEED_INCREMENT 10
 #define SPEED_INCREMENT_ROTATION 20
-#define CRUISE_SPEED 60
-#define ROTATIONAL_CRUISE_SPEED 70
+#define CRUISE_SPEED 40
+#define ROTATIONAL_CRUISE_SPEED 50
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
@@ -90,7 +90,7 @@ private:
 	DistanceSensor highDistanceBottom;
 	DistanceSensor proximity;
 	LineSensor lineSensor;
-	Feet feet;
+	Feet feet;	
 	Remote remote;
 	Eyes eyes;
 	bool eggOnBoard;
