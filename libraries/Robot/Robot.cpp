@@ -257,14 +257,14 @@ bool Robot::scanForEgg() {
 
 		elapsedTime = millis() - startTime;
 
-		if ( elapsedTime > SHORT_TIME_OUT){
+		if ( elapsedTime > 2*SHORT_TIME_OUT){
 			motion.stop();
 			Serial.println("Entered in timeout");
 			enterPanicState();
 			break;
 		}
 
-		if (!obstacle && elapsedTime > SHORT_TIME_OUT / 2) {
+		if (!obstacle && elapsedTime > SHORT_TIME_OUT) {
 			motion.stop();
 			motion.moveBackward(cruiseSpeed);
 			delay(800);
@@ -288,9 +288,10 @@ bool Robot::scanForEgg() {
 	motion.stop();
 	fixFeet();
 	delay(200);
-	if (random(0, 2) <= 1) {
+	int guess = random(0, 3);
+	if (guess <= 1) {
 		motion.rotateLeft(rotationalCruiseSpeed);
-	} else {
+	} else if ( guess <= 2){
 		motion.rotateRight(rotationalCruiseSpeed);
 	}
 	delay(random(0, 200));
@@ -370,7 +371,7 @@ bool Robot::changePosition(){
 			//}
 		
 			if(!canMoveForward()){
-				delay(1000); // wait for passing robot
+				delay(4000); // wait for passing robot
 				if(!canMoveForward()){
 					moveBackward(10);
 					if (canMoveForward()) {
@@ -1165,7 +1166,7 @@ bool Robot::rotateToFreeDirection(){
 		fixFeet();		
 		delay(50);
 
-		motion.rotateLeft(rotationalCruiseSpeed); // 10% speed
+		motion.rotateLeft(rotationalCruiseSpeed); 
 		delay(100);
 
 		Serial.print("try with distance : ");
@@ -1206,6 +1207,10 @@ bool Robot::rotateToFreeDirection(){
 					enterPanicState();
 					return false;
 				}else{
+					motion.stop();					
+					motion.moveBackward(cruiseSpeed);
+					delay(800);
+					motion.stop();
 					switchRotation = true;
 					startTime = millis();
 					motion.rotateRight(rotationalCruiseSpeed);
@@ -1257,6 +1262,7 @@ bool Robot::rotateRight(double angleRad){
 	Serial.println("enter rotate right");
 	unsigned long millisFromStart = 0;
 
+	bool movedBackward = false;
 	double initialOrientation = position.getOrientation();
 	// toAngle must be between 0 and 2*PI
 	double toAngle = fmod(2*PI + position.getOrientation() - angleRad, 2*PI);
@@ -1272,6 +1278,7 @@ bool Robot::rotateRight(double angleRad){
 	delay(50);
 	unsigned long startTime = millis();
 	motion.rotateRight(rotationalCruiseSpeed);
+	
 	
 	while (!areCloseAngles(position.getOrientation(),toAngle, TOLERANCE_ANGLE)){ 
 		// Serial.println(position.getOrientation());
@@ -1289,7 +1296,18 @@ bool Robot::rotateRight(double angleRad){
 				motion.rotateRight(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 		}
 
-		if ( millisFromStart  > SHORT_TIME_OUT ){
+		if (!movedBackward && millisFromStart > SHORT_TIME_OUT ){
+			motion.stop();	
+			position.clearMouseBuffer();
+			movedBackward = true;
+			motion.moveBackward(cruiseSpeed);
+			delay(800);
+			motion.stop();
+			motion.rotateRight(rotationalCruiseSpeed);
+			delay(100);
+		}
+
+		if ( millisFromStart  > 2*SHORT_TIME_OUT ){
 			motion.stop();	
 			position.clearMouseBuffer();	
 			enterPanicState();
@@ -1320,6 +1338,7 @@ bool Robot::rotateLeft(double angleRad){
 	unsigned long millisFromStart = 0;
 	double initialOrientation = position.getOrientation();
 	
+	bool movedBackward = false;
 	// toAngle must be between 0 and 2*PI
 	double toAngle = fmod(2*PI + position.getOrientation() + angleRad, 2*PI);
 	Serial.print("initial orientation : ");
@@ -1351,7 +1370,18 @@ bool Robot::rotateLeft(double angleRad){
 				motion.rotateLeft(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
 		}
 		
-		if ( millisFromStart > SHORT_TIME_OUT ){
+		if (!movedBackward && millisFromStart > SHORT_TIME_OUT ){
+			motion.stop();	
+			position.clearMouseBuffer();
+			movedBackward = true;
+			motion.moveBackward(cruiseSpeed);
+			delay(800);
+			motion.stop();
+			motion.rotateLeft(rotationalCruiseSpeed);
+			delay(100);
+		}
+
+		if ( millisFromStart > 2*SHORT_TIME_OUT ){
 			motion.stop();	
 			position.clearMouseBuffer();		
 			enterPanicState();
