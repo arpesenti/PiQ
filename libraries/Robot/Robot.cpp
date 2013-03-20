@@ -278,17 +278,22 @@ bool Robot::scanForEgg() {
 		Serial.print("Current orientation: ");
 		Serial.println(currentOrientation);
 		checkSpeedChange();
+		if (checkPanicState()) {
+			enterPanicState();
+			return false;
+		}
 	}
 
 	Serial.println("completed rotation for scan - no eggs found");
 	motion.stop();
 	fixFeet();
-	if (random(0, 2) >= 1) {
+	delay(200);
+	if (random(0, 2) <= 1) {
 		motion.rotateLeft(rotationalCruiseSpeed);
 	} else {
 		motion.rotateRight(rotationalCruiseSpeed);
 	}
-	delay(random(300, 400));
+	delay(random(0, 200));
 	motion.stop();
 	position.clearMouseBuffer();
 	fixFeet();
@@ -607,7 +612,7 @@ int Robot::tryToApproach() {
 // da considerare se incontro ostacoli...
 // per ora si aggiorna costantemente l'angolo...
 
-	int radius = 5;
+	int radius = 10;
 	double deltaX = 0;
 	double deltaY = 0;
 	
@@ -750,6 +755,11 @@ bool Robot::searchLine() {
 
 	// rotate toward PI
 	double currentDirection = 0;
+	if (position.getX() < 0) {
+		currentDirection = 0;
+	} else {
+		currentDirection = PI;
+	}
 	if (!isOnBlueLine()) {
 		Serial.println("Adjusting orientation");
 		if (adjustOrientation(currentDirection) == false) {
@@ -891,8 +901,34 @@ bool Robot::followLineToHome() {
 			} else {
 				delay(4000);
 				if (highDistanceTop.distance() < 16) {
+					enterPanicState();
 					return false;
 				}
+			}
+		}
+		// check from remote if wrong direction
+		if (checkTurnAround()) {
+			bool result = adjustOrientation(fmod(2*PI + position.getOrientation() + PI/2, 2*PI));
+			delay(200);
+			if (result == false) {
+				Serial.println("Failed adjustOrientation in turnAround");
+				return false;
+			}
+			unsigned long startTime = millis();
+
+			motion.rotateLeft(rotationalCruiseSpeed);
+			while(millis() - startTime < TASK_TIME_OUT){
+				SoftwareServo::refresh();
+				if (isOnBlueLine()){
+					motion.stop();	
+					Serial.println("refound line");
+					break;
+				}
+			}
+			motion.stop();
+			if (millis() - startTime > TASK_TIME_OUT) {
+				enterPanicState();
+				return false;
 			}
 		}
 		motion.moveForward(cruiseSpeed);
@@ -908,7 +944,7 @@ bool Robot::followLineToHome() {
 bool Robot::refindBlueLine() {
 
 	unsigned long startTime = millis();
-
+	int start = 50;
 	motion.rotateLeft(rotationalCruiseSpeed);
 	Serial.println("Entered in refindLine");
 	while(millis() - startTime < m500_TIME_OUT/2){
@@ -923,7 +959,7 @@ bool Robot::refindBlueLine() {
 	delay(50);
 	startTime = millis();
 	motion.rotateRight(rotationalCruiseSpeed);
-	while(millis() - startTime <  m500_TIME_OUT*0.9){
+	while(millis() - startTime <  m500_TIME_OUT - start){
 		SoftwareServo::refresh();
 		if (isOnBlueLine()){
 			motion.stop();	
@@ -939,7 +975,7 @@ bool Robot::refindBlueLine() {
 	delay(50);
 	startTime = millis();
 	motion.rotateRight(rotationalCruiseSpeed);
-	while(millis() - startTime < 1.5*m500_TIME_OUT){
+	while(millis() - startTime < 1.3*m500_TIME_OUT){
 		SoftwareServo::refresh();
 		if (isOnBlueLine()){
 			motion.stop();	
@@ -951,7 +987,7 @@ bool Robot::refindBlueLine() {
 	delay(50);
 	startTime = millis();
 	motion.rotateLeft(rotationalCruiseSpeed);
-	while(millis() - startTime <  m500_TIME_OUT*2.3){
+	while(millis() - startTime <  m500_TIME_OUT*2.6 - start){
 		SoftwareServo::refresh();
 		if (isOnBlueLine()){
 			motion.stop();	
@@ -1082,7 +1118,7 @@ bool Robot::escapeFromWait() {
 		char command = remote.strategy();
 		if (command == NORMAL_STRATEGY) {
 			eyes.commandBlink(state);
-			//start();
+			start();
 			state = EXPLORE_SCAN;
 		} 
 	}
@@ -1231,7 +1267,7 @@ bool Robot::rotateRight(double angleRad){
 	Serial.println(toAngle);
 
 	int count = 1;
-	int interval = 150;
+	int interval = 100;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
@@ -1244,6 +1280,10 @@ bool Robot::rotateRight(double angleRad){
 		
 		if (millisFromStart > count*interval) {
 			SoftwareServo::refresh();
+			if (checkPanicState()) {
+				enterPanicState();
+				return false;
+			}
 			count += 1;
 			if (checkSpeedChange()) 
 				motion.rotateRight(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
@@ -1289,7 +1329,7 @@ bool Robot::rotateLeft(double angleRad){
 
 
 	int count = 1;
-	int interval = 150;
+	int interval = 100;
 	fixFeet();
 	delay(50);
 	unsigned long startTime = millis();
@@ -1302,6 +1342,10 @@ bool Robot::rotateLeft(double angleRad){
 
 		if (millisFromStart > count*interval) {
 			SoftwareServo::refresh();
+			if (checkPanicState()) {
+				enterPanicState();
+				return false;
+			}
 			count += 1;
 			if (checkSpeedChange()) 
 				motion.rotateLeft(rotationalCruiseSpeed); // it's possible to increase the speed while it's rotating
@@ -1549,6 +1593,17 @@ bool Robot::checkPanicState() {
 	remote.update();
 	char strategy = remote.strategy();
 	if (strategy == PANIC_STRATEGY) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Robot::checkTurnAround() {
+	remote.update();
+	char strategy = remote.strategy();
+	if (strategy == REMOTE_STOP) {
+		eyes.commandBlink(state);
 		return true;
 	} else {
 		return false;

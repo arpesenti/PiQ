@@ -7,8 +7,7 @@ Eyes::Eyes() {
 void Eyes::init(){
 	pinMode(LEFT_EYE_PIN, OUTPUT);
 	pinMode(RIGHT_EYE_PIN, OUTPUT);
-	digitalWrite(LEFT_EYE_PIN, HIGH);
-	digitalWrite(RIGHT_EYE_PIN, HIGH);
+	on();
 }
 void Eyes::on() {
 	digitalWrite(LEFT_EYE_PIN, HIGH);

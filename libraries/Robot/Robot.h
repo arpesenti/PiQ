@@ -48,8 +48,8 @@
 
 #define SPEED_INCREMENT 10
 #define SPEED_INCREMENT_ROTATION 20
-#define CRUISE_SPEED 40
-#define ROTATIONAL_CRUISE_SPEED 50
+#define CRUISE_SPEED 50
+#define ROTATIONAL_CRUISE_SPEED 55
 
 #define DISTANCE_FOR_ADJUSTING_ANGLE 10
 #define DECELERATING_DISTANCE 11
@@ -109,6 +109,7 @@ private:
 	bool isOnBlueLine();
 	void rotateToAngle(double angle);
 	bool checkSpeedChange();
+	bool checkTurnAround();
 	bool refindBlueLine();
 	bool tryToRefindEggFromDistance();
 	int freeRam();
