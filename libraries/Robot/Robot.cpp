@@ -294,19 +294,19 @@ bool Robot::scanForEgg() {
 	delay(500);
 	int x = position.getX()/MOUSE_SCALE;
 	int guess = 0;
-	if (x > 25) {
+	if (x > 20) {
+		guess = 0;
+	} else if (x < -20) {
 		guess = 1;
-	} else if (x < -25) {
-		guess = 2;
 	} else {
 		guess = random(0, 2);
 	} 
-	if (guess <= 1) {
+	if (guess == 0) {
 		motion.rotateLeft(rotationalCruiseSpeed);
 		delay(random(100, 300));
-	} else if (guess <=2) {
+	} else if (guess == 1) {
 		motion.rotateRight(rotationalCruiseSpeed);
-		delay(random(200, 500));
+		delay(random(300, 600));
 	} 
 	motion.stop();
 	position.clearMouseBuffer();
