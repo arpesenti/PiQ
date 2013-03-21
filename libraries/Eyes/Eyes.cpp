@@ -20,12 +20,14 @@ void Eyes::off() {
 	digitalWrite(RIGHT_EYE_PIN, LOW);
 }
 void Eyes::blink(int intervallMilliSeconds) {
+	bool eyesWereOn = eyesOn;
 	for (int i = 0; i<intervallMilliSeconds/50; i++) {
 		on();
-		delay(50);
+		delay(25);
 		off();
+		delay(25);
 	}
-	if (eyesOn) on();
+	if (eyesWereOn) on();
 }
 
 void Eyes::commandBlink(int currentState){

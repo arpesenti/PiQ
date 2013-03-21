@@ -246,6 +246,7 @@ bool Robot::scanForEgg() {
 
 				}
 				Serial.println("Egg found");
+				eyes.blink(500);
 				return true;
 			
 			} else {
