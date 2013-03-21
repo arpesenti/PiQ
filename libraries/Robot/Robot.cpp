@@ -197,7 +197,7 @@ bool Robot::scanForEgg() {
 					bool found = false;
 					
 					motion.rotateRight(rotationalCruiseSpeed);
-					while(millis() - startTimeRefound < 4 * m100_TIME_OUT){
+					while(millis() - startTimeRefound < 6 * m100_TIME_OUT){
 						if (highDistanceBottom.distance() < 60 || proximity.distance() < 15){
 							motion.stop();	
 							Serial.println("refound egg");
@@ -286,15 +286,27 @@ bool Robot::scanForEgg() {
 
 	Serial.println("completed rotation for scan - no eggs found");
 	motion.stop();
+	motion.rotateRight(rotationalCruiseSpeed);
+	delay(500);
+	motion.stop();
 	fixFeet();
-	delay(200);
-	int guess = random(0, 3);
+	delay(500);
+	int x = position.getX()/MOUSE_SCALE;
+	int guess = 0;
+	if (x > 25) {
+		guess = 1;
+	} else if (x < -25) {
+		guess = 2;
+	} else {
+		guess = random(0, 2);
+	} 
 	if (guess <= 1) {
 		motion.rotateLeft(rotationalCruiseSpeed);
-	} else if ( guess <= 2){
+		delay(random(100, 300));
+	} else if (guess <=2) {
 		motion.rotateRight(rotationalCruiseSpeed);
-	}
-	delay(random(0, 200));
+		delay(random(200, 500));
+	} 
 	motion.stop();
 	position.clearMouseBuffer();
 	fixFeet();
@@ -552,6 +564,7 @@ bool Robot::catchEgg() {
 		motion.moveForward(cruiseSpeed);
 		delay(300);
 		motion.stop();
+		eyes.blink(1000);
 		return true; //egg on board
 	} else {
 		feet.open(); //egg missed
@@ -564,6 +577,7 @@ bool Robot::catchEgg() {
 			motion.moveForward(cruiseSpeed);
 			delay(300);
 			motion.stop();
+			eyes.blink(1000);
 			return true; //egg on board
 		} else {
 			feet.open();
@@ -619,7 +633,9 @@ int Robot::tryToApproach() {
 	
 	double distanceNew = sqrt(square(position.getX()) + square(position.getY())) / MOUSE_SCALE;
 	double distanceOld = distanceNew;
+	delay(500);
 	double currentOrientation = position.getOrientation();
+	currentOrientation = position.getOrientation();
 	double vectorPositionAngle = atan2(position.getY(), position.getX());
 	double angleToFollow = fmod(2*PI + (vectorPositionAngle - PI), 2*PI);
 	int speed = cruiseSpeed;
@@ -773,7 +789,7 @@ bool Robot::searchLine() {
 	motion.moveForward(cruiseSpeed);
 	unsigned long partialStartTime = millis();
 	while (!isOnBlueLine() && millis()-startTime < TIME_OUT) {
-		if (millis() - partialStartTime > 1000) {
+		if (canMoveForward() && millis() - partialStartTime > 700) {
 			motion.stop();
 			if (adjustOrientation(currentDirection) == false) {
 				return false;
@@ -784,12 +800,15 @@ bool Robot::searchLine() {
 		}
 		if (!canMoveForward()) {
 			motion.stop();
-			delay(4000); // wait for passing robots
+			delay(3000); // wait for passing robots
 			if(canMoveForward()){
 				motion.moveForward(cruiseSpeed);
+				partialStartTime = millis();
 				continue;
 			}
-
+			motion.moveBackward(cruiseSpeed);
+			delay(800);
+			motion.stop();
 			if (currentDirection == 0) {
 				if (adjustOrientation(PI/2) == false) {
 					return false;
@@ -807,6 +826,7 @@ bool Robot::searchLine() {
 			}	  
 			fixFeet();
 			motion.moveForward(cruiseSpeed);
+			partialStartTime = millis();
 		}
 		checkSpeedChange();
 	}
@@ -1047,28 +1067,56 @@ bool Robot::escapeFromPanic() {
 			state = COMEBACK_LINESEARCHING;
 		}else if (command == REMOTE_ROTATELEFT) {
 			motion.stop();
+			unsigned long startTime = millis();
 			motion.rotateLeft(rotationalCruiseSpeed);
-			delay(500);
+			while( millis() - startTime < 500) {
+				remote.update();
+				char commandStop = remote.strategy();
+				if (commandStop == REMOTE_STOP) {
+					break;
+				}
+			}
 			motion.stop();
+			fixFeet();
 		} else if (command == REMOTE_ROTATERIGHT) {
 			motion.stop();
+			unsigned long startTime = millis();
 			motion.rotateRight(rotationalCruiseSpeed);
-			delay(500);
+			while( millis() - startTime < 500) {
+				remote.update();
+				char commandStop = remote.strategy();
+				if (commandStop == REMOTE_STOP) {
+					break;
+				}
+			}
 			motion.stop();
+			fixFeet();
 		} else if (command == REMOTE_MOVEFORWARD) {
 			motion.stop();
 			unsigned long startTime = millis();
 			motion.moveForward(cruiseSpeed);
-			while( millis() - startTime < 500);
-				//position.update();
+			while( millis() - startTime < 500) {
+				remote.update();
+				char commandStop = remote.strategy();
+				if (commandStop == REMOTE_STOP) {
+					break;
+				}
+			}
 			motion.stop();
+			fixFeet();
 		} else if (command == REMOTE_MOVEBACKWARD) {
 			motion.stop();
 			unsigned long startTime = millis();
 			motion.moveBackward(cruiseSpeed);
-			while( millis() - startTime < 500);
-				//position.update();
+			while( millis() - startTime < 500) {
+				remote.update();
+				char commandStop = remote.strategy();
+				if (commandStop == REMOTE_STOP) {
+					break;
+				}
+			}
 			motion.stop();
+			fixFeet();
 		} else if (command == REMOTE_STOP) {
 			motion.stop();
 			eyes.commandBlink(state);

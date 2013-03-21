@@ -7,18 +7,25 @@ Eyes::Eyes() {
 void Eyes::init(){
 	pinMode(LEFT_EYE_PIN, OUTPUT);
 	pinMode(RIGHT_EYE_PIN, OUTPUT);
-	on();
+	//on();
 }
 void Eyes::on() {
+	eyesOn = true;
 	digitalWrite(LEFT_EYE_PIN, HIGH);
 	digitalWrite(RIGHT_EYE_PIN, HIGH);
 }
 void Eyes::off() {
+	eyesOn = false;
 	digitalWrite(LEFT_EYE_PIN, LOW);
 	digitalWrite(RIGHT_EYE_PIN, LOW);
 }
 void Eyes::blink(int intervallMilliSeconds) {
-	
+	for (int i = 0; i<intervallMilliSeconds/50; i++) {
+		on();
+		delay(50);
+		off();
+	}
+	if (eyesOn) on();
 }
 
 void Eyes::commandBlink(int currentState){
