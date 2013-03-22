@@ -566,6 +566,12 @@ bool Robot::catchEgg() {
 		delay(300);
 		motion.stop();
 		eyes.blink(1000);
+		for (int i = 0; i< 10; i++) {
+			if (checkPanicState()) {
+				enterPanicState();
+				return false;
+			}
+		}
 		return true; //egg on board
 	} else {
 		feet.open(); //egg missed
@@ -579,9 +585,21 @@ bool Robot::catchEgg() {
 			delay(300);
 			motion.stop();
 			eyes.blink(1000);
+			for (int i = 0; i< 10; i++) {
+				if (checkPanicState()) {
+					enterPanicState();
+					return false;
+				}
+			}
 			return true; //egg on board
 		} else {
 			feet.open();
+			for (int i = 0; i< 10; i++) {
+				if (checkPanicState()) {
+					enterPanicState();
+					return false;
+				}
+			}
 			return false;
 		}	
 	}
@@ -697,7 +715,10 @@ int Robot::tryToApproach() {
 			position.update();
 			Serial.println(distanceNew);
 			position.update();
-			
+			if (checkPanicState()) {
+				enterPanicState();
+				return false;
+			}
 			// check if already on orange line
 			if (distanceNew < 80 && lineSensor.color() == 'o') {
 				fixFeet();

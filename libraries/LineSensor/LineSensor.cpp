@@ -68,7 +68,7 @@ char LineSensor::color() {
 	// int Glevel = level(greenValue);
 	// int Blevel = level(blueValue);
 
-	if (redValue > 980 && greenValue > 880  && greenValue < 980 && blueValue > 600 && blueValue < 700)
+	if (redValue > 980 && greenValue > 900  && greenValue < 1000 && blueValue > 680 && blueValue < 770)
 		return 'o';
 	else if (redValue < 650 && greenValue < 650 && blueValue < 650)
 		return 'k';
